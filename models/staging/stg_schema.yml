@@ -1,0 +1,118 @@
+version: 2
+
+models:
+  - name: stg_tesla__teams
+    description: "테슬라 팀 정보 스테이징 테이블"
+    columns:
+      - name: region
+        tests:
+          - not_null
+      - name: team_id
+        tests:
+          - not_null
+
+  - name: stg_tesla__workspaces
+    description: "테슬라 워크스페이스 정보 스테이징 테이블"
+    columns:
+      - name: region
+        tests:
+          - not_null
+      - name: workspace_id
+        tests:
+          - not_null
+      - name: team_id
+        tests:
+          - not_null
+
+  - name: stg_tesla__facilities
+    description: "테슬라 퍼실리티 정보 스테이징 테이블"
+    columns:
+      - name: region
+        tests:
+          - not_null
+      - name: facility_id
+        tests:
+          - not_null
+      - name: workspace_id
+        tests:
+          - not_null
+
+  - name: stg_tesla__levels
+    description: "테슬라 레벨 정보 스테이징 테이블"
+    columns:
+      - name: region
+        tests:
+          - not_null
+      - name: level_id
+        tests:
+          - not_null
+      - name: facility_id
+        tests:
+          - not_null
+
+  - name: stg_tesla__cameras
+    description: "테슬라 레벨 정보 스테이징 테이블"
+    columns:
+      - name: region
+        tests:
+          - not_null
+      - name: camera_id
+        tests:
+          - not_null
+  
+  - name: stg_tesla__users
+    description: "테슬라 유저 정보 스테이징 테이블"
+    columns:
+      - name: region
+        tests:
+          - not_null
+      - name: user_id
+        tests:
+          - not_null
+      - name: team_id
+        tests:
+          - not_null
+
+  - name: stg_tesla__captures
+    description: "테슬라 캡처 정보 스테이징 테이블"
+    columns:
+      - name: region
+        tests:
+          - not_null
+      - name: capture_id
+        tests:
+          - not_null
+      - name: team_id
+        tests:
+          - not_null
+      - name: workspace_id
+        tests:
+          - not_null
+      - name: facility_id
+        tests:
+          - not_null
+      - name: level_id
+        tests:
+          - not_null
+      - name: record_id
+        tests:
+          - not_null
+      - name: captured_by_user_id
+        tests:
+          - not_null
+      - name: capture_name
+        tests:
+          - not_null
+      - name: panos_count
+        tests:
+          - not_null
+      - name: reprocess_count
+        tests:
+          - not_null
+      - name: video_length
+        tests:
+          - not_null
+          
+          
+
+          
