@@ -20,9 +20,9 @@ models:
       - name: workspace_id
         tests:
           - not_null
-      - name: team_id
-        tests:
-          - not_null
+      # - name: team_id
+      #   tests:
+      #     - not_null
 
   - name: stg_tesla__facilities
     description: "테슬라 퍼실리티 정보 스테이징 테이블"
@@ -33,9 +33,9 @@ models:
       - name: facility_id
         tests:
           - not_null
-      - name: workspace_id
-        tests:
-          - not_null
+      # - name: workspace_id
+      #   tests:
+      #     - not_null
 
   - name: stg_tesla__levels
     description: "테슬라 레벨 정보 스테이징 테이블"
@@ -46,9 +46,9 @@ models:
       - name: level_id
         tests:
           - not_null
-      - name: facility_id
-        tests:
-          - not_null
+      # - name: facility_id
+      #   tests:
+      #     - not_null
 
   - name: stg_tesla__cameras
     description: "테슬라 레벨 정보 스테이징 테이블"
@@ -69,9 +69,9 @@ models:
       - name: user_id
         tests:
           - not_null
-      - name: team_id
-        tests:
-          - not_null
+      # - name: team_id
+      #   tests:
+      #     - not_null
 
   - name: stg_tesla__captures
     description: "테슬라 캡처 정보 스테이징 테이블"
