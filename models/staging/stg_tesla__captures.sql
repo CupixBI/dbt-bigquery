@@ -56,7 +56,8 @@ renamed AS(
         
         -- [중요] user_id를 captured_by_user_id로 명확히 변경
         CAST(user_id as STRING) as captured_by_user_id,
-        video_length
+        video_length,
+        CAST(cupix_trace_id AS STRING) AS capture_trace_id,
     FROM filtered
 ),
 
@@ -259,7 +260,21 @@ final AS (
             captured_by_user_id
         ) AS region_captured_by_user_id,
         
-        video_length
+        video_length,
+        capture_trace_id,
+        CONCAT(
+            CASE region
+                WHEN 'uswe2' THEN 'US'
+                WHEN 'apse2' THEN 'AU'
+                WHEN 'euce1' THEN 'EU'
+                WHEN 'apne1' THEN 'JP'
+                WHEN 'apse1' THEN 'SG'
+                WHEN 'cace1' THEN 'CA'
+                ELSE 'Unknown'
+            END,
+            '-',
+            capture_trace_id
+        ) AS region_capture_trace_id,
 
     FROM renamed
 )

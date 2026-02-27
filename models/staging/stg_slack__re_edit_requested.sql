@@ -1,5 +1,5 @@
 WITH source AS(
-    SELECT * FROM {{ source("slack", "re_edit_requested" )}}
+    SELECT * FROM {{ source("slack", "re_edit_requested_native" )}}
 ),
 
 renamed AS(

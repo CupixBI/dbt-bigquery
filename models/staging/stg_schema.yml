@@ -112,6 +112,55 @@ models:
       - name: video_length
         tests:
           - not_null
+    
+  - name: stg_tesla__quotes
+    description: "테슬라 Quotes 정보 스테이징 테이블"
+    columns:
+      - name: region
+        tests:
+          - not_null
+      - name: quote_id
+        tests:
+          - not_null
+  
+  - name: stg_tesla__line_items
+    description: "테슬라 라인아이템 정보 스테이징 테이블"
+    columns:
+      - name: region
+        tests:
+          - not_null
+      - name: line_item_id
+        tests:
+          - not_null
+  
+  - name: stg_tesla__capture_traces
+    description: "테슬라 캡처 프로세싱 정보 스테이징 테이블"
+    columns:
+      - name: timestamp
+        tests:
+          - not_null
+
+  - name: stg_tesla__bims
+    description: "테슬라 빔 정보 스테이징 테이블"
+    columns:
+      - name: id
+        tests:
+          - not_null
+      - name: region
+        tests:
+          - not_null
+
+  - name: stg_tesla__annotations
+    description: "테슬라 주석 정보 스테이징 테이블"
+    columns:
+      - name: id
+        tests:
+          - not_null
+      - name: region
+        tests:
+          - not_null
+      
+
           
           
 

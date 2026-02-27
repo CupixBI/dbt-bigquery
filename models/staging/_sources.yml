@@ -14,23 +14,44 @@ sources:
       - name: editings
       - name: cameras
       - name: quotes
+      - name: line_items
+      - name: integrations
+      - name: products_name
+      - name: aerial_maps
+      - name: bims
+      - name: annotations
+      - name: products
+      - name: applied_products
 
   - name: monday  
     database: prism-485708  
     schema: monday_raw  
     tables:
-      - name: capture_issues
+      - name: capture_issues_native
 
   - name: slack
     database: prism-485708
     schema: slack_raw
     tables:
-      - name: re_edit_requested
+      - name: re_edit_requested_native
 
   - name: finance
     database: prism-485708
     schema: finance_raw
     tables:
-      - name: cqa_editors
-      - name: cqa_labor_unit_cost
-      - name: sqa_labor_unit_cost
+      - name: cqa_editors_native
+      - name: cqa_labor_unit_cost_native
+      - name: sqa_labor_unit_cost_native
+
+  - name: salesforce
+    database: prism-485708
+    schema: salesforce_raw
+    tables:
+      - name: opportunity
+      - name: user
+
+  - name: cupixworks
+    database: prism-485708       
+    schema: cupixworks_raw       
+    tables:
+      - name: capture_traces     

@@ -1,5 +1,5 @@
 WITH source AS(
-    select * FROM {{ source('monday', 'capture_issues') }}
+    select * FROM {{ source('monday', 'capture_issues_native') }}
 ),
 
 filtered AS (
