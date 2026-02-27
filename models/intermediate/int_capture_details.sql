@@ -94,9 +94,12 @@ final AS(
         
         -- teams
         teams.team_name,
+        teams.region_team_id,
 
         -- facilities
-        facilities.facility_name
+        facilities.facility_name,
+        -- facilities.facility_address,
+        facilities.region_facility_id
 
     FROM filtered AS captures
     

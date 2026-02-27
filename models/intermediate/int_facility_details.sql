@@ -7,7 +7,6 @@ workspaces AS (
 ),
 
 teams AS (
-    -- 이미 이메일 컬럼(account_manager_email 등)이 포함되어 있습니다.
     SELECT * FROM {{ ref('stg_tesla__teams') }}
 ),
 
@@ -16,6 +15,7 @@ final AS (
         -- 1. Facility (Grain)
         f.facility_id,
         f.facility_name,
+        -- f.facility_address,
         f.created_at AS facility_created_at,
         
         -- Region 변환 로직
@@ -28,7 +28,8 @@ final AS (
             WHEN 'cace1' THEN 'CA'
             ELSE 'Unknown'
         END AS region,
-        
+
+        f.region_facility_id,
         f.state AS facility_state,
         f.cycle_state AS facility_cycle_state,
         f.facility_size,
@@ -45,6 +46,7 @@ final AS (
         -- 3. Team
         t.team_id,
         t.team_name,
+        t.domain AS team_domain,
         t.state AS team_state,
         t.cycle_state AS team_cycle_state,
         t.lock_state AS team_lock_state,

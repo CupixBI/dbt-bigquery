@@ -1,9 +1,9 @@
 WITH cqa_editors AS(
-    SELECT * FROM {{ source('finance', 'cqa_editors') }}
+    SELECT * FROM {{ source('finance', 'cqa_editors_native') }}
 ),
 
 cqa_labor_unit_cost AS(
-    SELECT * FROM {{ source('finance', 'cqa_labor_unit_cost') }}
+    SELECT * FROM {{ source('finance', 'cqa_labor_unit_cost_native') }}
 ),
 
 add_location_and_filtered AS(

@@ -20,7 +20,8 @@ renamed AS (
         last_captured_at,
         
         -- [추가] sys 컬럼에서 address 키의 값만 추출 (JSON 파싱)
-        JSON_EXTRACT_SCALAR(sys, '$.address') as facility_address
+        -- JSON_EXTRACT_SCALAR(sys, '$.address') as facility_address
+        -- sys.address as facility_address
 
     FROM source
 ),
@@ -55,7 +56,7 @@ final AS (
         quote_id,
         
         -- [추가] 주소 정보 (Null이면 Unknown 처리)
-        COALESCE(facility_address, 'Unknown') AS facility_address,
+        -- COALESCE(facility_address, 'Unknown') AS facility_address,
         
         timezone_offset,
         workspace_id,
