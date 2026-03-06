@@ -30,6 +30,10 @@ users_with_teams AS (
     SELECT * FROM {{ ref('int_users_with_teams') }}
 ),
 
+segment_events AS (
+    SELECT * FROM {{ ref('stg_cupixworks__segment_events') }}
+),
+
 -- facility_detail에서 팀별 집계
 team_facility_stats AS (
     SELECT
@@ -135,6 +139,17 @@ team_user_stats AS (
     GROUP BY 1, 2
 ),
 
+-- segment_events에서 팀별 마지막 활동 일시 (시스템 이벤트는 스테이징에서 제외됨)
+team_activity AS (
+    SELECT
+        team_id,
+        region,
+        MAX(event_timestamp) AS last_activity_at
+    FROM segment_events
+    WHERE team_id IS NOT NULL
+    GROUP BY 1, 2
+),
+
 final AS (
     SELECT
         tr.*,
@@ -160,6 +175,9 @@ final AS (
         COALESCE(cs.error_captures, 0) AS error_captures,
         COALESCE(cs.capture_error_rate, 0) AS capture_error_rate,
 
+        -- 마지막 활동 일시
+        ta.last_activity_at,
+
         -- 메타
         CURRENT_TIMESTAMP() AS updated_at
 
@@ -175,6 +193,10 @@ final AS (
 
     LEFT JOIN team_capture_stats cs
         ON tr.region_team_id = cs.region_team_id
+
+    LEFT JOIN team_activity ta
+        ON tr.team_id = ta.team_id
+        AND tr.region = ta.region
 )
 
 SELECT * FROM final

@@ -56,4 +56,5 @@ sources:
     database: prism-485708       
     schema: cupixworks_raw       
     tables:
-      - name: capture_traces     
+      - name: capture_traces
+      - name: segment_events     
