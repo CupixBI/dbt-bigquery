@@ -1,7 +1,7 @@
 with
     captures as (
         select region_capture_id, capture_trace_id, video_length, created_at, error_code, reconstruction_error_code, capture_type, cycle_state
-        from {{ ref("stg_tesla__captures") }}
+        from {{ ref("int_capture_details") }}
     ),
 
     capture_traces as (
@@ -39,35 +39,75 @@ with
     group by ct.capture_trace_id
 ),
 
-    site_view_published as (
-        select ct.capture_trace_id, min(ct.timestamp_kst) as site_view_published_at  -- ✅
-        from {{ ref("stg_cupixworks__capture_traces") }} ct
-        inner join captures c
-            on ct.capture_trace_id = c.capture_trace_id
-        inner join (
-            select
-                e.capture_trace_id,
-                max(case when w.stage like '%editing_waiting_for_review%' then w.timestamp_kst end) as review_time,  -- ✅
-                min(e.timestamp_kst) as editing_time  -- ✅
-            from {{ ref("stg_cupixworks__capture_traces") }} e
-            left join {{ ref("stg_cupixworks__capture_traces") }} w
-                on e.capture_trace_id = w.capture_trace_id
-                and w.stage like '%editing_waiting_for_review%'
-            where e.stage like '%editing_editing%'
-            group by e.capture_trace_id
-        ) base
-            on ct.capture_trace_id = base.capture_trace_id
-            and ct.timestamp_kst > coalesce(base.review_time, base.editing_time)  -- ✅
-            and (
-                -- 리뷰 있고 3d_map이면 reconstruction_started
-                (base.review_time is not null and c.capture_type = '3d_map' and ct.stage like '%reconstruction_started%')
-                -- 리뷰 있고 3d_map 아니면 editing_done
-                or (base.review_time is not null and c.capture_type != '3d_map' and ct.stage like '%editing_done%')
-                -- 리뷰 없으면 editing_done
-                or (base.review_time is null and ct.stage like '%editing_done%')
-            )
-        group by ct.capture_trace_id
-    ),
+    site_view_published AS (
+    -- 3d_map: 구간 내 editing_done or reconstruction_started
+    SELECT
+        ct.capture_trace_id,
+        MIN(ct.timestamp_kst) AS site_view_published_at
+    FROM {{ ref("stg_cupixworks__capture_traces") }} ct
+    INNER JOIN captures c
+        ON ct.capture_trace_id = c.capture_trace_id
+    -- 리뷰 여부 & 구간 기준점 계산
+    INNER JOIN (
+        SELECT
+            capture_trace_id,
+            MIN(CASE WHEN stage LIKE '%editing_in_review%' THEN timestamp_kst END) AS review_started_at,
+            MIN(CASE WHEN stage LIKE '%editing_editing%'   THEN timestamp_kst END) AS editing_started_at,
+            MIN(CASE WHEN stage LIKE '%reconstruction_started%' THEN timestamp_kst END) AS reconstruction_started_at,
+            -- 구간 기준: 리뷰 있으면 editing_in_review, 없으면 editing_editing
+            COALESCE(
+                MIN(CASE WHEN stage LIKE '%editing_in_review%' THEN timestamp_kst END),
+                MIN(CASE WHEN stage LIKE '%editing_editing%'   THEN timestamp_kst END)
+            ) AS range_start
+        FROM {{ ref("stg_cupixworks__capture_traces") }}
+        GROUP BY capture_trace_id
+    ) bounds
+        ON ct.capture_trace_id = bounds.capture_trace_id
+    -- editing_done in range 여부
+    LEFT JOIN (
+        SELECT
+            ed.capture_trace_id,
+            MIN(ed.timestamp_kst) AS first_editing_done_in_range
+        FROM {{ ref("stg_cupixworks__capture_traces") }} ed
+        INNER JOIN (
+            SELECT
+                capture_trace_id,
+                COALESCE(
+                    MIN(CASE WHEN stage LIKE '%editing_in_review%' THEN timestamp_kst END),
+                    MIN(CASE WHEN stage LIKE '%editing_editing%'   THEN timestamp_kst END)
+                ) AS range_start,
+                MIN(CASE WHEN stage LIKE '%reconstruction_started%' THEN timestamp_kst END) AS reconstruction_started_at
+            FROM {{ ref("stg_cupixworks__capture_traces") }}
+            GROUP BY capture_trace_id
+        ) r ON ed.capture_trace_id = r.capture_trace_id
+        WHERE ed.stage LIKE '%editing_done%'
+          AND ed.timestamp_kst > r.range_start
+          AND ed.timestamp_kst < r.reconstruction_started_at
+        GROUP BY ed.capture_trace_id
+    ) done_in_range
+        ON ct.capture_trace_id = done_in_range.capture_trace_id
+    WHERE c.capture_type = '3d_map'
+      AND (
+          -- editing_done in range 있으면 그거
+          (ct.stage LIKE '%editing_done%' AND ct.timestamp_kst = done_in_range.first_editing_done_in_range)
+          -- 없으면 reconstruction_started
+          OR (done_in_range.first_editing_done_in_range IS NULL AND ct.stage LIKE '%reconstruction_started%')
+      )
+    GROUP BY ct.capture_trace_id
+
+    UNION ALL
+
+    -- 3d_map 아닌 경우: max(editing_done)
+    SELECT
+        ct.capture_trace_id,
+        MAX(ct.timestamp_kst) AS site_view_published_at
+    FROM {{ ref("stg_cupixworks__capture_traces") }} ct
+    INNER JOIN captures c
+        ON ct.capture_trace_id = c.capture_trace_id
+    WHERE c.capture_type != '3d_map'
+      AND ct.stage LIKE '%editing_done%'
+    GROUP BY ct.capture_trace_id
+),
 
     review_duration as (
         select

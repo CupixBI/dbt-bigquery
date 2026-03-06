@@ -24,6 +24,7 @@ WITH source AS (
         cp.review_started_to_review_finished_min,
         cp.total_lead_time_min,
         cp.error_code,
+        cp.video_length_range,
         cp.reconstruction_error_code,
         DATE_TRUNC(CAST(cp.uploading_finished_at AS DATE), WEEK(MONDAY)) 
     = DATE_TRUNC(DATE_SUB(CURRENT_DATE(), INTERVAL 1 WEEK), WEEK(MONDAY)) 
