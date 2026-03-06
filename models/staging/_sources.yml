@@ -22,6 +22,8 @@ sources:
       - name: annotations
       - name: products
       - name: applied_products
+      - name: groups
+      - name: grouped_users
 
   - name: monday  
     database: prism-485708  

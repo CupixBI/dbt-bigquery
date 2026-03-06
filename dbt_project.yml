@@ -54,3 +54,8 @@ models:
       +materialized: table       # Marts는 성능을 위해 무조건 Table로 저장!
       +schema: 03_marts          # 데이터셋 이름 뒤에 _03_marts가 붙음
       +tags: ["gold"]
+
+
+vars:
+  sla_3d_map_min: 480
+  sla_default_min: 360

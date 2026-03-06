@@ -56,7 +56,15 @@ team_facility_stats AS (
              AND facility_cycle_state = 'created'
              AND facility_size_unit = 'SQM' THEN facility_size * 10.7639
             ELSE 0
-        END) AS used_area_sqft
+        END) AS used_area_sqft,
+
+        -- 캡처된 면적 (단위 없이 원본 숫자 합산)
+        SUM(CASE
+            WHEN workspace_lock_state = 'active'
+             AND facility_cycle_state = 'created'
+            THEN COALESCE(captured_size, 0)
+            ELSE 0
+        END) AS total_captured_size
 
     FROM facility_detail
     GROUP BY 1, 2
@@ -137,6 +145,7 @@ final AS (
 
         -- 면적 (SqFt) — contracted_area_sqft는 tr.*에 포함
         COALESCE(fs.used_area_sqft, 0) AS used_area_sqft,
+        COALESCE(fs.total_captured_size, 0) AS total_captured_size,
         SAFE_DIVIDE(
             COALESCE(fs.used_area_sqft, 0),
             NULLIF(tr.contracted_area_sqft, 0)
@@ -149,7 +158,10 @@ final AS (
         COALESCE(cs.total_captures, 0) AS total_captures,
         cs.avg_capture_interval_days,
         COALESCE(cs.error_captures, 0) AS error_captures,
-        COALESCE(cs.capture_error_rate, 0) AS capture_error_rate
+        COALESCE(cs.capture_error_rate, 0) AS capture_error_rate,
+
+        -- 메타
+        CURRENT_TIMESTAMP() AS updated_at
 
     FROM team_revenue tr
 

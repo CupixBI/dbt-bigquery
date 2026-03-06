@@ -27,6 +27,7 @@ team_quotes AS (
         team_lock_state,
         account_manager_email,
         primary_csm_email,
+        secondary_csm_email,
 
         -- quote 수
         COUNT(DISTINCT quote_id) AS total_quotes,
@@ -48,7 +49,7 @@ team_quotes AS (
         COUNT(DISTINCT CASE WHEN NOT has_sf_opportunity THEN line_item_id END) AS sf_unconnected_line_items
 
     FROM team_subs
-    GROUP BY 1,2,3,4,5,6,7,8,9
+    GROUP BY 1,2,3,4,5,6,7,8,9,10
 ),
 
 -- 2단계: 팀별 매출 (opportunity 단위 deduplicate)
@@ -147,6 +148,23 @@ team_license_scope AS (
     WHERE rn = 1
 ),
 
+-- 5단계: 팀별 배정된 CSM 목록 (groups + grouped_users + users → 이메일)
+team_assigned_csms AS (
+    SELECT
+        g.team_id,
+        g.region,
+        STRING_AGG(u.user_email, ', ' ORDER BY u.user_email) AS assigned_csm_emails
+    FROM {{ ref('stg_tesla__groups') }} g
+    INNER JOIN {{ ref('stg_tesla__grouped_users') }} gu
+        ON g.group_id = gu.group_id
+        AND g.region = gu.region
+    INNER JOIN {{ ref('stg_tesla__users') }} u
+        ON gu.user_id = u.user_id
+        AND gu.region = u.region
+    WHERE g.group_type_code = 'assigned_customer_success_managers'
+    GROUP BY 1, 2
+),
+
 -- 최종 조합
 final AS (
     SELECT
@@ -159,6 +177,8 @@ final AS (
         tq.team_lock_state,
         tq.account_manager_email,
         tq.primary_csm_email,
+        tq.secondary_csm_email,
+        COALESCE(tcsm.assigned_csm_emails, '') AS assigned_csm_emails,
 
         -- 구독 현황
         tq.total_quotes,
@@ -199,6 +219,8 @@ final AS (
         ON tq.team_id = tlt.team_id AND tq.region = tlt.region
     LEFT JOIN team_license_scope tls
         ON tq.team_id = tls.team_id AND tq.region = tls.region
+    LEFT JOIN team_assigned_csms tcsm
+        ON tq.team_id = tcsm.team_id AND tq.region = tcsm.region
 )
 
 SELECT * FROM final

@@ -42,6 +42,10 @@ final AS (
             capture_trace_id
         ) AS region_capture_trace_id,
     TIMESTAMP(JSON_VALUE(log_json, '$."@timestamp"')) AS timestamp,
+    TIMESTAMP_ADD(
+      TIMESTAMP(JSON_VALUE(log_json, '$."@timestamp"')), 
+      INTERVAL 9 HOUR
+    ) AS timestamp_kst,
     JSON_VALUE(log_json, '$.remark')                  AS stage,
     log_json
   FROM deduped
