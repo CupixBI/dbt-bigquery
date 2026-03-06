@@ -39,6 +39,7 @@ quote_level AS (
         team_lock_state,
         account_manager_email,
         primary_csm_email,
+        secondary_csm_email,
 
         quote_id,
         region_quote_id,
@@ -90,7 +91,7 @@ quote_level AS (
         END) AS contracted_area_sqft
 
     FROM team_subs
-    GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20
+    GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21
 ),
 
 -- 2단계: 실제 사용 면적 — Team 라이센스는 팀 전체, Workspace 라이센스는 해당 workspace만
@@ -107,7 +108,13 @@ team_used_area AS (
              AND facility_cycle_state = 'created'
              AND facility_size_unit = 'SQM' THEN facility_size * 10.7639
             ELSE 0
-        END) AS used_area_sqft
+        END) AS used_area_sqft,
+        SUM(CASE
+            WHEN workspace_lock_state = 'active'
+             AND facility_cycle_state = 'created'
+            THEN COALESCE(captured_size, 0)
+            ELSE 0
+        END) AS total_captured_size
     FROM facility_detail
     GROUP BY 1, 2
 ),
@@ -125,8 +132,31 @@ workspace_used_area AS (
              AND facility_cycle_state = 'created'
              AND facility_size_unit = 'SQM' THEN facility_size * 10.7639
             ELSE 0
-        END) AS used_area_sqft
+        END) AS used_area_sqft,
+        SUM(CASE
+            WHEN workspace_lock_state = 'active'
+             AND facility_cycle_state = 'created'
+            THEN COALESCE(captured_size, 0)
+            ELSE 0
+        END) AS total_captured_size
     FROM facility_detail
+    GROUP BY 1, 2
+),
+
+-- 배정된 CSM 목록 (팀 단위, 이메일 STRING)
+team_assigned_csms AS (
+    SELECT
+        g.team_id,
+        g.region,
+        STRING_AGG(u.user_email, ', ' ORDER BY u.user_email) AS assigned_csm_emails
+    FROM {{ ref('stg_tesla__groups') }} g
+    INNER JOIN {{ ref('stg_tesla__grouped_users') }} gu
+        ON g.group_id = gu.group_id
+        AND g.region = gu.region
+    INNER JOIN {{ ref('stg_tesla__users') }} u
+        ON gu.user_id = u.user_id
+        AND gu.region = u.region
+    WHERE g.group_type_code = 'assigned_customer_success_managers'
     GROUP BY 1, 2
 ),
 
@@ -142,6 +172,8 @@ final AS (
         ql.team_lock_state,
         ql.account_manager_email,
         ql.primary_csm_email,
+        ql.secondary_csm_email,
+        COALESCE(tcsm.assigned_csm_emails, '') AS assigned_csm_emails,
 
         ql.quote_id,
         ql.region_quote_id,
@@ -187,6 +219,11 @@ final AS (
             WHEN ql.billable_type = 'Workspace' THEN COALESCE(wua.used_area_sqft, 0)
             ELSE 0
         END AS used_area_sqft,
+        CASE
+            WHEN ql.billable_type = 'Team' THEN COALESCE(tua.total_captured_size, 0)
+            WHEN ql.billable_type = 'Workspace' THEN COALESCE(wua.total_captured_size, 0)
+            ELSE 0
+        END AS total_captured_size,
         SAFE_DIVIDE(
             CASE
                 WHEN ql.billable_type = 'Team' THEN COALESCE(tua.used_area_sqft, 0)
@@ -194,7 +231,10 @@ final AS (
                 ELSE 0
             END,
             NULLIF(ql.contracted_area_sqft, 0)
-        ) AS capacity_utilization_rate
+        ) AS capacity_utilization_rate,
+
+        -- 메타
+        CURRENT_TIMESTAMP() AS updated_at
 
     FROM quote_level ql
 
@@ -207,6 +247,10 @@ final AS (
         ON ql.billable_type = 'Workspace'
         AND ql.workspace_id = wua.workspace_id
         AND ql.region = wua.region
+
+    LEFT JOIN team_assigned_csms tcsm
+        ON ql.team_id = tcsm.team_id
+        AND ql.region = tcsm.region
 )
 
 SELECT * FROM final

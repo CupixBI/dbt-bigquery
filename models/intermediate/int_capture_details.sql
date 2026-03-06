@@ -46,6 +46,8 @@ filtered AS(
     SELECT *
     FROM captures
     WHERE video_length < 4000
+    AND captured_by_user_email NOT LIKE '%cupix%'
+    AND NOT (capture_type IN ('3D Map', 'Video') AND video_length = 0)
 ),
 
 final AS(
@@ -53,6 +55,7 @@ final AS(
         -- Captures 기본 정보
         captures.region,
         captures.created_at,
+        TIMESTAMP_ADD(captures.created_at, INTERVAL 9 HOUR) AS created_at_kst,
         captures.region_capture_id,
         captures.cycle_state,
         captures.editing_state,
@@ -70,6 +73,8 @@ final AS(
         captures.reprocess_count,
         captures.upload_state,
         captures.video_length,
+        -- Creator 정보
+        captures.captured_by_user_email,
 
         -- [추가됨] Editor 정보
         -- 1. Users 테이블에서 가져온 이메일

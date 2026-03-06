@@ -61,14 +61,20 @@ renamed AS(
     FROM filtered
 ),
 
+-- users 참조 (user_email 조인용)
+users AS (
+    SELECT region, user_id, user_email
+    FROM {{ ref('stg_tesla__users') }}
+),
+
 -- 2단계: Null 처리 및 비즈니스 로직
 final AS (
     SELECT
         -- [기본 컬럼]
-        region,
+        renamed.region,
         capture_id,
         CONCAT(
-            CASE region
+            CASE renamed.region
                 WHEN 'uswe2' THEN 'US'
                 WHEN 'apse2' THEN 'AU'
                 WHEN 'euce1' THEN 'EU'
@@ -82,12 +88,12 @@ final AS (
         ) AS region_capture_id,
         
         captured_at,
-        created_at,
+        renamed.created_at,
 
         -- [1] FK 및 참조값 (NOT NULL이므로 그대로 사용)
         camera_id,
         CONCAT(
-            CASE region
+            CASE renamed.region
                 WHEN 'uswe2' THEN 'US'
                 WHEN 'apse2' THEN 'AU'
                 WHEN 'euce1' THEN 'EU'
@@ -104,7 +110,7 @@ final AS (
         editing_id,
         editor_id,
         CONCAT(
-            CASE region
+            CASE renamed.region
                 WHEN 'uswe2' THEN 'US'
                 WHEN 'apse2' THEN 'AU'
                 WHEN 'euce1' THEN 'EU'
@@ -118,8 +124,8 @@ final AS (
         ) AS region_editor_id,
         
         -- [2] 상태(State) 값 (데이터 누락 가능성이 있다면 COALESCE 유지 추천)
-        COALESCE(state, 'Unknown') AS state,
-        COALESCE(cycle_state, 'Unknown') AS cycle_state,
+        COALESCE(renamed.state, 'Unknown') AS state,
+        COALESCE(renamed.cycle_state, 'Unknown') AS cycle_state,
         COALESCE(editing_state, 'Unknown') AS editing_state,
         COALESCE(reconstruction_state, 'Unknown') AS reconstruction_state,
         COALESCE(refinement_state, 'Unknown') AS refinement_state,
@@ -134,7 +140,7 @@ final AS (
         COALESCE(progress, -1) AS progress,
 
         -- [나머지 컬럼들]
-        cycle_state_updated_at,
+        renamed.cycle_state_updated_at,
         editing_difficulty_score,
         editing_state_updated_at,
         error_code,
@@ -142,7 +148,7 @@ final AS (
         -- Facility ID (NOT NULL)
         facility_id,
         CONCAT(
-            CASE region
+            CASE renamed.region
                 WHEN 'uswe2' THEN 'US'
                 WHEN 'apse2' THEN 'AU'
                 WHEN 'euce1' THEN 'EU'
@@ -158,7 +164,7 @@ final AS (
         -- Level ID (NOT NULL)
         level_id,
         CONCAT(
-            CASE region
+            CASE renamed.region
                 WHEN 'uswe2' THEN 'US'
                 WHEN 'apse2' THEN 'AU'
                 WHEN 'euce1' THEN 'EU'
@@ -174,7 +180,7 @@ final AS (
         -- Workspace ID (NOT NULL)
         workspace_id,
         CONCAT(
-            CASE region
+            CASE renamed.region
                 WHEN 'uswe2' THEN 'US'
                 WHEN 'apse2' THEN 'AU'
                 WHEN 'euce1' THEN 'EU'
@@ -188,9 +194,9 @@ final AS (
         ) AS region_workspace_id,
         
         -- Team ID (NOT NULL)
-        team_id,
+        renamed.team_id,
         CONCAT(
-            CASE region
+            CASE renamed.region
                 WHEN 'uswe2' THEN 'US'
                 WHEN 'apse2' THEN 'AU'
                 WHEN 'euce1' THEN 'EU'
@@ -200,7 +206,7 @@ final AS (
                 ELSE 'Unknown'
             END,
             '-',
-            team_id
+            renamed.team_id
         ) AS region_team_id,
         
         -- Capture Name & Type
@@ -221,7 +227,7 @@ final AS (
         
         record_id,
         CONCAT(
-            CASE region
+            CASE renamed.region
                 WHEN 'uswe2' THEN 'US'
                 WHEN 'apse2' THEN 'AU'
                 WHEN 'euce1' THEN 'EU'
@@ -247,7 +253,7 @@ final AS (
         -- User ID (NOT NULL) - 컬럼명 captured_by_user_id로 통일
         captured_by_user_id,
         CONCAT(
-            CASE region
+            CASE renamed.region
                 WHEN 'uswe2' THEN 'US'
                 WHEN 'apse2' THEN 'AU'
                 WHEN 'euce1' THEN 'EU'
@@ -260,10 +266,13 @@ final AS (
             captured_by_user_id
         ) AS region_captured_by_user_id,
         
+        -- [추가] user_email (users 테이블에서 조인)
+        COALESCE(users.user_email, 'Unknown') AS captured_by_user_email,
+
         video_length,
         capture_trace_id,
         CONCAT(
-            CASE region
+            CASE renamed.region
                 WHEN 'uswe2' THEN 'US'
                 WHEN 'apse2' THEN 'AU'
                 WHEN 'euce1' THEN 'EU'
@@ -277,6 +286,9 @@ final AS (
         ) AS region_capture_trace_id,
 
     FROM renamed
+    LEFT JOIN users
+        ON renamed.region = users.region
+        AND renamed.captured_by_user_id = users.user_id
 )
 
 SELECT * FROM final

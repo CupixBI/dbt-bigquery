@@ -19,21 +19,14 @@ final AS (
         f.created_at AS facility_created_at,
         
         -- Region 변환 로직
-        CASE f.region
-            WHEN 'uswe2' THEN 'US'
-            WHEN 'apse2' THEN 'AU'
-            WHEN 'euce1' THEN 'EU'
-            WHEN 'apne1' THEN 'JP'
-            WHEN 'apse1' THEN 'SG'
-            WHEN 'cace1' THEN 'CA'
-            ELSE 'Unknown'
-        END AS region,
+        f.region AS region,
 
         f.region_facility_id,
         f.state AS facility_state,
         f.cycle_state AS facility_cycle_state,
         f.facility_size,
         f.facility_size_unit,
+        f.captured_size,
 
         -- 2. Workspace
         w.workspace_id,

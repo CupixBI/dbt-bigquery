@@ -72,6 +72,7 @@ with_team_info AS (
         t.lock_state AS team_lock_state,
         t.account_manager_email,
         t.primary_csm_email,
+        t.secondary_csm_email,
 
         -- Quote 정보
         qt.quote_id,
@@ -109,6 +110,7 @@ final AS (
         ti.team_lock_state,
         ti.account_manager_email,
         ti.primary_csm_email,
+        ti.secondary_csm_email,
 
         -- Quote 정보
         ti.quote_id,

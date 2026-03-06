@@ -13,6 +13,7 @@ renamed AS (
         TIMESTAMP(cycle_state_updated_at) as cycle_state_updated_at,
         facility_size,
         facility_size_unit,
+        captured_size,
         CAST(quote_id as STRING) as quote_id,
         timezone_offset,
         CAST(workspace_id as STRING) as workspace_id,
@@ -53,6 +54,7 @@ final AS (
         cycle_state_updated_at,
         COALESCE(facility_size, -1) AS facility_size,
         COALESCE(facility_size_unit, 'Unknown') AS facility_size_unit,
+        COALESCE(captured_size, 0) AS captured_size,
         quote_id,
         
         -- [추가] 주소 정보 (Null이면 Unknown 처리)
