@@ -51,6 +51,14 @@ exchange_rates AS (
     SELECT * FROM {{ source('finance', 'exchange_rate') }}
 ),
 
+latest_exchange_rates AS (
+    SELECT
+        currency_code,
+        rate_to_usd
+    FROM exchange_rates
+    WHERE year = (SELECT MAX(year) FROM exchange_rates)
+),
+
 -- 1순위: teams.sf_resource_id로 직접 매칭
 matched_by_sf_resource AS (
     SELECT
@@ -154,8 +162,8 @@ final AS (
         creator.full_name AS created_by_name,
         creator.email AS created_by_email,
         -- USD 변환
-        er.rate_to_usd,
-        c.amount * COALESCE(er.rate_to_usd, 1) AS amount_usd
+        COALESCE(er.rate_to_usd, er_latest.rate_to_usd) AS rate_to_usd,
+        c.amount * COALESCE(er.rate_to_usd, er_latest.rate_to_usd, 1) AS amount_usd
     FROM combined c
     LEFT JOIN accounts a
         ON c.account_id = a.account_id
@@ -166,6 +174,8 @@ final AS (
     LEFT JOIN exchange_rates er
         ON c.currency_code = er.currency_code
         AND EXTRACT(YEAR FROM c.close_date) = er.year
+    LEFT JOIN latest_exchange_rates er_latest
+        ON c.currency_code = er_latest.currency_code
 )
 
 SELECT * FROM final
