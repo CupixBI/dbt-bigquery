@@ -26,6 +26,7 @@ WITH opportunities AS (
         lead_type,
         win_story,
         loss_reason,
+        owner_region,
         opp_number
     FROM {{ ref('stg_salesforce__opportunities') }}
 ),
@@ -54,7 +55,7 @@ exchange_rates AS (
 matched_by_sf_resource AS (
     SELECT
         o.*,
-        t.region,
+        t.region AS team_region,
         t.region_team_id,
         t.team_id,
         t.team_name,
@@ -79,46 +80,11 @@ unmatched_after_1 AS (
     WHERE t.sf_resource_id IS NULL
 ),
 
--- 2순위: Opp account_id의 ParentId → sf_resource_id 매칭
-matched_by_parent AS (
-    SELECT
-        u.*,
-        t.region,
-        t.region_team_id,
-        t.team_id,
-        t.team_name,
-        t.account_manager_id,
-        t.account_manager_email,
-        t.primary_csm_id,
-        t.primary_csm_email,
-        t.secondary_csm_id,
-        t.secondary_csm_email,
-        'parent_sf_resource_id' AS match_source
-    FROM unmatched_after_1 u
-    INNER JOIN accounts a
-        ON u.account_id = a.account_id
-    INNER JOIN teams t
-        ON a.parent_account_id = t.sf_resource_id
-    WHERE a.parent_account_id IS NOT NULL
-),
-
--- 2순위 매칭 안 된 Opp
-unmatched_after_2 AS (
-    SELECT u.*
-    FROM unmatched_after_1 u
-    LEFT JOIN accounts a
-        ON u.account_id = a.account_id
-    LEFT JOIN teams t
-        ON a.parent_account_id = t.sf_resource_id
-        AND a.parent_account_id IS NOT NULL
-    WHERE t.sf_resource_id IS NULL
-),
-
--- 3순위: seed CSV의 sf_account_id로 매칭
+-- 2순위: seed CSV의 sf_account_id로 매칭
 matched_by_seed AS (
     SELECT
         u.*,
-        t.region,
+        t.region AS team_region,
         t.region_team_id,
         t.team_id,
         t.team_name,
@@ -129,7 +95,7 @@ matched_by_seed AS (
         t.secondary_csm_id,
         t.secondary_csm_email,
         'seed_mapping' AS match_source
-    FROM unmatched_after_2 u
+    FROM unmatched_after_1 u
     INNER JOIN seed_mapping s
         ON u.account_id = s.sf_account_id
     LEFT JOIN teams t
@@ -140,7 +106,7 @@ matched_by_seed AS (
 still_unmatched AS (
     SELECT
         u.*,
-        CAST(NULL AS STRING) AS region,
+        CAST(NULL AS STRING) AS team_region,
         CAST(NULL AS STRING) AS region_team_id,
         CAST(NULL AS STRING) AS team_id,
         CAST(NULL AS STRING) AS team_name,
@@ -151,7 +117,7 @@ still_unmatched AS (
         CAST(NULL AS STRING) AS secondary_csm_id,
         CAST(NULL AS STRING) AS secondary_csm_email,
         'unmatched' AS match_source
-    FROM unmatched_after_2 u
+    FROM unmatched_after_1 u
     LEFT JOIN seed_mapping s
         ON u.account_id = s.sf_account_id
     WHERE s.sf_account_id IS NULL
@@ -159,8 +125,6 @@ still_unmatched AS (
 
 combined AS (
     SELECT * FROM matched_by_sf_resource
-    UNION ALL
-    SELECT * FROM matched_by_parent
     UNION ALL
     SELECT * FROM matched_by_seed
     UNION ALL

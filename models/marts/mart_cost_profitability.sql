@@ -16,14 +16,15 @@ WITH monthly_mrr AS (
     SELECT
         region_team_id,
         team_name,
-        region,
+        team_region,
+        owner_region,
         year_month,
         month_start,
         SUM(monthly_mrr) AS total_mrr,
         COUNT(DISTINCT account_id) AS active_accounts,
         COUNT(DISTINCT opportunity_id) AS active_subscriptions
     FROM {{ ref('mart_growth_mrr_monthly') }}
-    GROUP BY 1, 2, 3, 4, 5
+    GROUP BY 1, 2, 3, 4, 5, 6
 ),
 
 monthly_cost AS (
@@ -44,7 +45,8 @@ final AS (
     SELECT
         COALESCE(m.region_team_id, c.region_team_id) AS region_team_id,
         COALESCE(m.team_name, t.team_name) AS team_name,
-        COALESCE(m.region, t.region) AS region,
+        COALESCE(m.team_region, t.region) AS team_region,
+        m.owner_region,
         COALESCE(m.year_month, c.year_month) AS year_month,
         COALESCE(m.month_start, c.month_start) AS month_start,
 
@@ -71,7 +73,7 @@ final AS (
         ON m.region_team_id = c.region_team_id
         AND m.year_month = c.year_month
     LEFT JOIN {{ ref('stg_tesla__teams') }} t
-        ON c.region_team_id = t.region_team_id
+        ON COALESCE(m.region_team_id, c.region_team_id) = t.region_team_id
 )
 
 SELECT * FROM final
