@@ -44,6 +44,7 @@ sources:
       - name: cqa_editors_native
       - name: cqa_labor_unit_cost_native
       - name: sqa_labor_unit_cost_native
+      - name: exchange_rate
 
   - name: salesforce
     database: prism-485708
@@ -51,10 +52,19 @@ sources:
     tables:
       - name: opportunity
       - name: user
+      - name: opportunitylineitem
+      - name: account
 
   - name: cupixworks
     database: prism-485708       
     schema: cupixworks_raw       
     tables:
       - name: capture_traces
-      - name: segment_events     
+      - name: segment_events
+
+  - name: seed
+    database: prism-485708
+    schema: seed_raw
+    tables:
+      - name: team_sf_account_mapping
+  

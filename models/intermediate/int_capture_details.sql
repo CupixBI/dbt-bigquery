@@ -72,6 +72,7 @@ final AS(
         captures.upload_state,
         captures.video_length,
         captures.captured_by_user_email,
+        captures.level_id,
 
         users.user_email AS editor_email,
         cqa.editor_name,
