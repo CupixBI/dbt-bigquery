@@ -80,11 +80,12 @@ final AS (
         -- Team
         w.region_team_id,
         w.team_name,
-        w.region,
+        w.team_region,
 
         -- AE / CSM
         w.owner_name,
         w.owner_email,
+        w.owner_region,
         w.primary_csm_email,
         w.account_manager_email
 

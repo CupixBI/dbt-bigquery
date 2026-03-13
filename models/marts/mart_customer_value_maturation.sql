@@ -32,7 +32,7 @@ account_year_agg AS (
         o.account_id,
         o.account_name,
         o.market_segment,
-        o.region,
+        o.owner_region,
         o.owner_name,
         o.primary_csm_email,
         o.account_manager_email,

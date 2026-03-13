@@ -72,13 +72,14 @@ final AS (
         region_team_id,
         team_id,
         team_name,
-        region,
+        team_region,
         match_source,
 
         -- AE (Opp Owner)
         owner_id,
         owner_name,
         owner_email,
+        owner_region,
 
         -- CSM/AM
         account_manager_id,
