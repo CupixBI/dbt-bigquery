@@ -1,7 +1,13 @@
 with base as (
     select
         region_capture_id,
+        uploading_finished_at,
         video_length_range,
+        is_sla_exceeded,
+        capture_type,
+        team_name,
+        region_team_id,
+        project_name,
         uploading_to_processing_finished_min,
         processing_finished_to_preview_finished_min,
         preview_finished_to_edit_started_min,
@@ -9,52 +15,23 @@ with base as (
         edit_finished_to_review_started_min,
         review_started_to_review_finished_min,
         first_cpc_generation_duration_min
-    from {{ ref('int_capture_processing') }}
+    from {{ ref('fct_capture_processing_enriched') }}
 )
 
-select
-    video_length_range,
-    'uploading_to_processing_finished' as stage,
-    uploading_to_processing_finished_min as duration_min
-from base
+select uploading_finished_at, is_sla_exceeded, capture_type, team_name, region_team_id, project_name, video_length_range, '1. Upload → Processing' as stage, uploading_to_processing_finished_min as duration_min from base
 union all
-select
-    video_length_range,
-    'processing_finished_to_preview_finished' as stage,
-    processing_finished_to_preview_finished_min as duration_min
-from base
+select uploading_finished_at, is_sla_exceeded, capture_type, team_name, region_team_id, project_name, video_length_range, '2. Processing → Preview' as stage, processing_finished_to_preview_finished_min as duration_min from base
 union all
-select
-    video_length_range,
-    'preview_finished_to_edit_started' as stage,
-    preview_finished_to_edit_started_min as duration_min
-from base
+select uploading_finished_at, is_sla_exceeded, capture_type, team_name, region_team_id, project_name, video_length_range, '3. Preview → Edit Wait' as stage, preview_finished_to_edit_started_min as duration_min from base
 union all
-select
-    video_length_range,
-    'edit_started_to_edit_finished' as stage,
-    edit_started_to_edit_finished_min as duration_min
-from base
+select uploading_finished_at, is_sla_exceeded, capture_type, team_name, region_team_id, project_name, video_length_range, '4. Edit Duration' as stage, edit_started_to_edit_finished_min as duration_min from base
 union all
-select
-    video_length_range,
-    'edit_finished_to_review_started' as stage,
-    edit_finished_to_review_started_min as duration_min
-from base
+select uploading_finished_at, is_sla_exceeded, capture_type, team_name, region_team_id, project_name, video_length_range, '5. Edit → Review Wait' as stage, edit_finished_to_review_started_min as duration_min from base
 union all
-select
-    video_length_range,
-    'review_started_to_review_finished' as stage,
-    review_started_to_review_finished_min as duration_min
-from base
+select uploading_finished_at, is_sla_exceeded, capture_type, team_name, region_team_id, project_name, video_length_range, '6. Review Duration' as stage, review_started_to_review_finished_min as duration_min from base
 union all
-select
-    video_length_range,
-    'first_cpc_generation_duration' as stage,
-    first_cpc_generation_duration_min as duration_min
-from base
+select uploading_finished_at, is_sla_exceeded, capture_type, team_name, region_team_id, project_name, video_length_range, '7. CPC Generation' as stage, first_cpc_generation_duration_min as duration_min from base
 
--- ✅ 두 축 모두 순서 지정
 order by
   case stage
     when 'uploading_to_processing_finished' then 1
@@ -66,8 +43,9 @@ order by
     when 'first_cpc_generation_duration' then 7
   end,
   case video_length_range
-    when 'Under 6 min' then 1
-    when '6–12 min' then 2
-    when '12–18 min' then 3
-    when 'Over 18 min' then 4
+    when '0 min' then 1
+    when 'Under 6 min' then 2
+    when '6–12 min' then 3
+    when '12–18 min' then 4
+    when 'Over 18 min' then 5
   end

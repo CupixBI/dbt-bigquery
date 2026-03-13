@@ -1,6 +1,6 @@
 with
     captures as (
-        select region_capture_id, capture_trace_id, video_length, created_at, error_code, reconstruction_error_code, capture_type, cycle_state
+        select region_capture_id, capture_trace_id, video_length, created_at, error_code, reconstruction_error_code, capture_type, cycle_state, editor_email, editor_level, editor_work_part
         from {{ ref("int_capture_details") }}
     ),
 
@@ -284,7 +284,7 @@ with
 select
     *,
     case
-        when video_length = 0 then 'Single Shot'
+        when video_length = 0 then '0 min'
         when video_length < 360 then 'Under 6 min'
         when video_length < 720 then '6–12 min'
         when video_length < 1080 then '12–18 min'

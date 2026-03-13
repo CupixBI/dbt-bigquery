@@ -1,5 +1,5 @@
 /*
-    stg_sf_opportunities.sql
+    stg_salesforce__opportunities.sql
     
     목적: Salesforce Opportunity 데이터 정리
     
@@ -14,7 +14,6 @@ WITH source AS (
     SELECT * FROM {{ source('salesforce', 'opportunity') }}
 ),
 
--- 스냅샷 중복 제거: 같은 Id에 여러 _extracted_at → 최신만
 deduplicated AS (
     SELECT
         *,
@@ -63,6 +62,18 @@ renamed AS (
         -- 라이센스
         CAST(License_Capacity_Area__c AS FLOAT64) AS license_capacity_area,
         Units__c AS license_units,
+
+        -- [추가] 파이프라인/예측
+        CAST(Probability AS FLOAT64) AS probability,
+        COALESCE(ForecastCategory, 'Unknown') AS forecast_category,
+
+        -- [추가] 리드/마케팅
+        COALESCE(LeadSource, 'Unknown') AS lead_source,
+        COALESCE(Lead_Type__c, 'Unknown') AS lead_type,
+
+        -- [추가] Win/Loss 분석
+        Win_Story__c AS win_story,
+        COALESCE(Lost_Reason__c, Loss_Reason__c, 'Unknown') AS loss_reason,
 
         -- OPP 번호
         OPP_Number__c AS opp_number,
