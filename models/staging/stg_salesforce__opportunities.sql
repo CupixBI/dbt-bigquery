@@ -65,7 +65,7 @@ renamed AS (
 
         -- 파이프라인/예측
         CAST(Probability AS FLOAT64) AS probability,
-        COALESCE(ForecastCategory, 'Unknown') AS forecast_category,
+        COALESCE(ForecastCategoryName, 'Unknown') AS forecast_category,
 
         -- 리드/마케팅
         COALESCE(LeadSource, 'Unknown') AS lead_source,
