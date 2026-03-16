@@ -12,7 +12,7 @@
 */
 
 WITH mapped AS (
-    SELECT * FROM {{ ref('int_team_opportunity_mapped') }}
+    SELECT * FROM {{ ref('int_opportunities_enriched') }}
 ),
 
 final AS (
@@ -68,26 +68,11 @@ final AS (
         license_expiration_date,
         first_sw_sale_date,
 
-        -- Team 정보
-        region_team_id,
-        team_id,
-        team_name,
-        team_region,
-        match_source,
-
         -- AE (Opp Owner)
         owner_id,
         owner_name,
         owner_email,
         owner_region,
-
-        -- CSM/AM
-        account_manager_id,
-        account_manager_email,
-        primary_csm_id,
-        primary_csm_email,
-        secondary_csm_id,
-        secondary_csm_email,
 
         -- 대시보드용 파생 컬럼
         CASE

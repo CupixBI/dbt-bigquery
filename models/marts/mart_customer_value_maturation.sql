@@ -20,7 +20,7 @@ WITH current_info AS (
 
 won_opps AS (
     SELECT *
-    FROM {{ ref('int_team_opportunity_mapped') }}
+    FROM {{ ref('int_opportunities_enriched') }}
     WHERE stage_name IN ('Closed Won', 'Invoiced')
       AND close_date IS NOT NULL
       AND amount_usd IS NOT NULL
@@ -34,8 +34,6 @@ account_year_agg AS (
         o.market_segment,
         o.owner_region,
         o.owner_name,
-        o.primary_csm_email,
-        o.account_manager_email,
         EXTRACT(YEAR FROM o.close_date) AS close_year,
 
         -- 연도 전체 합계 (USD)
@@ -63,7 +61,7 @@ account_year_agg AS (
 
     FROM won_opps o
     CROSS JOIN current_info c
-    GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, c.current_year, c.current_month
+    GROUP BY 1, 2, 3, 4, 5, 6, c.current_year, c.current_month
 ),
 
 with_tier AS (

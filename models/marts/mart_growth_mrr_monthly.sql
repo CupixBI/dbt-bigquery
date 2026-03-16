@@ -13,7 +13,7 @@
 
 WITH mapped AS (
     SELECT *
-    FROM {{ ref('int_team_opportunity_mapped') }}
+    FROM {{ ref('int_opportunities_enriched') }}
     WHERE stage_name IN ('Closed Won', 'Invoiced')
       AND subscription_start_date IS NOT NULL
       AND subscription_end_date IS NOT NULL
@@ -77,17 +77,12 @@ final AS (
         w.industry,
         w.territory,
 
-        -- Team
-        w.region_team_id,
-        w.team_name,
-        w.team_region,
-
-        -- AE / CSM
-        w.owner_name,
-        w.owner_email,
+        -- Region
         w.owner_region,
-        w.primary_csm_email,
-        w.account_manager_email
+
+        -- AE
+        w.owner_name,
+        w.owner_email
 
     FROM month_spine m
     INNER JOIN with_mrr w

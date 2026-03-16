@@ -3,56 +3,98 @@
     
     목적: Cost & Profitability 대시보드용
     
-    Grain: Team(region_team_id) × Month
+    Grain: Account × Month
     
     로직:
-      - MRR: mart_growth_mrr_monthly에서 팀별 월별 집계 (USD)
-      - Cost: int_capture_processing_costs에서 팀별 월별 집계
+      - MRR: mart_growth_mrr_monthly에서 account별 월별 집계 (USD)
+      - Cost: int_capture_processing_costs에서 team별 월별 집계 후
+              account ↔ team 매핑으로 account에 합산
       - Gross Profit = MRR - Total Cost
-      - 추후 COGS 유형 추가 시 컬럼 확장
 */
 
-WITH monthly_mrr AS (
+WITH account_team_mapping AS (
+    -- sf_resource_id로 매핑
+    SELECT DISTINCT
+        sf_resource_id AS account_id,
+        region_team_id
+    FROM {{ ref('stg_tesla__teams') }}
+    WHERE sf_resource_id != 'Unknown'
+    
+    UNION DISTINCT
+    
+    -- seed로 매핑
+    SELECT DISTINCT
+        sf_account_id AS account_id,
+        region_team_id
+    FROM {{ ref('stg_seed__team_sf_account_mapping') }}
+    WHERE sf_account_id IS NOT NULL
+),
+
+monthly_mrr AS (
     SELECT
-        region_team_id,
-        team_name,
-        team_region,
-        owner_region,
+        account_id,
         year_month,
         month_start,
         SUM(monthly_mrr) AS total_mrr,
-        COUNT(DISTINCT account_id) AS active_accounts,
         COUNT(DISTINCT opportunity_id) AS active_subscriptions
     FROM {{ ref('mart_growth_mrr_monthly') }}
-    GROUP BY 1, 2, 3, 4, 5, 6
+    GROUP BY 1, 2, 3
 ),
 
-monthly_cost AS (
+team_monthly_cost AS (
     SELECT
         region_team_id,
         year_month,
-        DATE_TRUNC(DATE(uploading_finished_at), MONTH) AS month_start,
         SUM(processing_cost) AS total_processing_cost,
         SUM(editing_labor_cost) AS total_editing_cost,
         SUM(total_capture_cost) AS total_cost,
         COUNT(*) AS capture_count
     FROM {{ ref('int_capture_processing_costs') }}
     WHERE region_team_id IS NOT NULL
-    GROUP BY 1, 2, 3
+    GROUP BY 1, 2
+),
+
+account_monthly_cost AS (
+    SELECT
+        atm.account_id,
+        tc.year_month,
+        SUM(tc.total_processing_cost) AS total_processing_cost,
+        SUM(tc.total_editing_cost) AS total_editing_cost,
+        SUM(tc.total_cost) AS total_cost,
+        SUM(tc.capture_count) AS capture_count
+    FROM team_monthly_cost tc
+    INNER JOIN account_team_mapping atm
+        ON tc.region_team_id = atm.region_team_id
+    GROUP BY 1, 2
+),
+
+accounts AS (
+    SELECT
+        account_id,
+        account_name,
+        owner_id
+    FROM {{ ref('stg_salesforce__accounts') }}
+),
+
+sf_users AS (
+    SELECT
+        sf_user_id,
+        full_name,
+        email
+    FROM {{ ref('stg_salesforce__users') }}
 ),
 
 final AS (
     SELECT
-        COALESCE(m.region_team_id, c.region_team_id) AS region_team_id,
-        COALESCE(m.team_name, t.team_name) AS team_name,
-        COALESCE(m.team_region, t.region) AS team_region,
-        m.owner_region,
+        COALESCE(m.account_id, c.account_id) AS account_id,
+        a.account_name,
+        u.full_name AS owner_name,
+        u.email AS owner_email,
         COALESCE(m.year_month, c.year_month) AS year_month,
-        COALESCE(m.month_start, c.month_start) AS month_start,
+        m.month_start,
 
         -- MRR (USD)
         COALESCE(m.total_mrr, 0) AS total_mrr,
-        COALESCE(m.active_accounts, 0) AS active_accounts,
         COALESCE(m.active_subscriptions, 0) AS active_subscriptions,
 
         -- Cost (유형별)
@@ -69,11 +111,13 @@ final AS (
         ) AS gross_margin_pct
 
     FROM monthly_mrr m
-    FULL OUTER JOIN monthly_cost c
-        ON m.region_team_id = c.region_team_id
+    FULL OUTER JOIN account_monthly_cost c
+        ON m.account_id = c.account_id
         AND m.year_month = c.year_month
-    LEFT JOIN {{ ref('stg_tesla__teams') }} t
-        ON COALESCE(m.region_team_id, c.region_team_id) = t.region_team_id
+    LEFT JOIN accounts a
+        ON COALESCE(m.account_id, c.account_id) = a.account_id
+    LEFT JOIN sf_users u
+        ON a.owner_id = u.sf_user_id
 )
 
 SELECT * FROM final

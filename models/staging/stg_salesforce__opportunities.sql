@@ -39,10 +39,14 @@ renamed AS (
         Name AS opportunity_name,
         Type AS opportunity_type,
         StageName AS stage_name,
+        CAST(IsClosed AS BOOLEAN) AS is_closed,
+        CAST(IsWon AS BOOLEAN) AS is_won,
 
         -- 매출
         CAST(Amount AS FLOAT64) AS amount,
+        CAST(Amount_USD__c AS FLOAT64) AS amount_usd,
         CurrencyIsoCode AS currency_code,
+        CAST(MRR__c AS FLOAT64) AS mrr,
 
         -- 날짜
         TIMESTAMP(CreatedDate) AS created_at,
