@@ -6,6 +6,7 @@
     Grain: Account × Month
     
     로직:
+      - team 매칭된 account만 포함
       - MRR: mart_growth_mrr_monthly에서 account별 월별 집계 (USD)
       - Cost: int_capture_processing_costs에서 team별 월별 집계 후
               account ↔ team 매핑으로 account에 합산
@@ -13,7 +14,6 @@
 */
 
 WITH account_team_mapping AS (
-    -- sf_resource_id로 매핑
     SELECT DISTINCT
         sf_resource_id AS account_id,
         region_team_id
@@ -22,12 +22,22 @@ WITH account_team_mapping AS (
     
     UNION DISTINCT
     
-    -- seed로 매핑
     SELECT DISTINCT
         sf_account_id AS account_id,
         region_team_id
     FROM {{ ref('stg_seed__team_sf_account_mapping') }}
     WHERE sf_account_id IS NOT NULL
+),
+
+account_teams_agg AS (
+    SELECT
+        atm.account_id,
+        STRING_AGG(DISTINCT atm.region_team_id, ', ') AS region_team_ids,
+        STRING_AGG(DISTINCT t.team_name, ', ') AS team_names
+    FROM account_team_mapping atm
+    LEFT JOIN {{ ref('stg_tesla__teams') }} t
+        ON atm.region_team_id = t.region_team_id
+    GROUP BY 1
 ),
 
 monthly_mrr AS (
@@ -38,6 +48,7 @@ monthly_mrr AS (
         SUM(monthly_mrr) AS total_mrr,
         COUNT(DISTINCT opportunity_id) AS active_subscriptions
     FROM {{ ref('mart_growth_mrr_monthly') }}
+    WHERE account_id IN (SELECT account_id FROM account_team_mapping)
     GROUP BY 1, 2, 3
 ),
 
@@ -92,6 +103,8 @@ final AS (
         u.full_name AS account_owner_name,
         u.email AS account_owner_email,
         u.region AS account_owner_region,
+        ata.region_team_ids,
+        ata.team_names,
         COALESCE(m.year_month, c.year_month) AS year_month,
         m.month_start,
 
@@ -120,6 +133,8 @@ final AS (
         ON COALESCE(m.account_id, c.account_id) = a.account_id
     LEFT JOIN sf_users u
         ON a.owner_id = u.sf_user_id
+    LEFT JOIN account_teams_agg ata
+        ON COALESCE(m.account_id, c.account_id) = ata.account_id
 )
 
 SELECT * FROM final
