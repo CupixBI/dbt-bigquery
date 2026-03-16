@@ -80,7 +80,8 @@ sf_users AS (
     SELECT
         sf_user_id,
         full_name,
-        email
+        email,
+        region
     FROM {{ ref('stg_salesforce__users') }}
 ),
 
@@ -88,8 +89,9 @@ final AS (
     SELECT
         COALESCE(m.account_id, c.account_id) AS account_id,
         a.account_name,
-        u.full_name AS owner_name,
-        u.email AS owner_email,
+        u.full_name AS account_owner_name,
+        u.email AS account_owner_email,
+        u.region AS account_owner_region,
         COALESCE(m.year_month, c.year_month) AS year_month,
         m.month_start,
 
