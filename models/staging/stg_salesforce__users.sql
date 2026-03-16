@@ -32,7 +32,8 @@ renamed AS (
         Email AS email,
         CAST(IsActive AS BOOLEAN) AS is_active,
         COALESCE(Title, 'Unknown') AS title,
-        COALESCE(Department, 'Unknown') AS department
+        COALESCE(Department, 'Unknown') AS department,
+        COALESCE(Region__c, 'Unknown') AS region
 
     FROM deduplicated
     WHERE row_num = 1
