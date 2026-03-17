@@ -141,7 +141,8 @@ renamed AS (
 
 SELECT * FROM renamed
 WHERE
-    -- track 이벤트만 포함 (시스템 이벤트 제외)
+    -- track 이벤트만 포함 (시스템 이벤트 제외) 
+    -- 아래 이벤트 리스트 구체화 필요
     event_type = 'track' AND event_name NOT IN (
         'SE_UPDATE_PANO', 'SE_CREATE_CAMERA', 'SE_CREATE_PANO',
         'WE_ENGINE_COMMAND', 'WE_SQA_EDITOR_CALL_SAVE', 'WE_SQA_EDITOR_CALL_SAVE_SUCCESS',

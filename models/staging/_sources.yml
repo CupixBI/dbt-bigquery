@@ -54,6 +54,7 @@ sources:
       - name: user
       - name: opportunitylineitem
       - name: account
+      - name: lead
 
   - name: cupixworks
     database: prism-485708       
