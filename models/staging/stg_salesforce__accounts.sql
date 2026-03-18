@@ -56,6 +56,7 @@ renamed AS (
         -- 관계 키
         OwnerId AS owner_id,
         ParentId AS parent_account_id,
+        CSM__c AS csm_id,
 
         -- 메타
         TIMESTAMP(_extracted_at) AS extracted_at

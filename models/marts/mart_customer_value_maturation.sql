@@ -100,6 +100,7 @@ with_tier AS (
 final AS (
     SELECT
         *,
+        DATE(close_year, 1, 1) AS close_year_date,
         -- YoY (YTD 기준, 올해 vs 작년만)
         CASE
             WHEN close_year = current_year THEN
