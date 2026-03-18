@@ -71,24 +71,24 @@ with_tier AS (
 
         -- Tier (연도 전체 기준)
         CASE
-            WHEN total_spending_usd >= 1000000 THEN 'A'
-            WHEN total_spending_usd >= 500000 THEN 'B'
-            WHEN total_spending_usd >= 250000 THEN 'C'
-            WHEN total_spending_usd >= 100000 THEN 'D'
-            WHEN total_spending_usd >= 50000 THEN 'E'
-            WHEN total_spending_usd >= 10000 THEN 'F'
-            ELSE 'G'
+            WHEN total_spending_usd >= 1000000 THEN 'A. >$1M'
+            WHEN total_spending_usd >= 500000 THEN 'B. $500K'
+            WHEN total_spending_usd >= 250000 THEN 'C. $250K'
+            WHEN total_spending_usd >= 100000 THEN 'D. $100K'
+            WHEN total_spending_usd >= 50000 THEN 'E. $50K'
+            WHEN total_spending_usd >= 10000 THEN 'F. $10K'
+            ELSE 'G. <$10K'
         END AS tier,
 
         -- YTD Tier (올해/작년만)
         CASE
-            WHEN ytd_spending_usd >= 1000000 THEN 'A'
-            WHEN ytd_spending_usd >= 500000 THEN 'B'
-            WHEN ytd_spending_usd >= 250000 THEN 'C'
-            WHEN ytd_spending_usd >= 100000 THEN 'D'
-            WHEN ytd_spending_usd >= 50000 THEN 'E'
-            WHEN ytd_spending_usd >= 10000 THEN 'F'
-            WHEN ytd_spending_usd IS NOT NULL THEN 'G'
+            WHEN ytd_spending_usd >= 1000000 THEN 'A. <$1M'
+            WHEN ytd_spending_usd >= 500000 THEN 'B. $500K'
+            WHEN ytd_spending_usd >= 250000 THEN 'C. $250K'
+            WHEN ytd_spending_usd >= 100000 THEN 'D. $100K'
+            WHEN ytd_spending_usd >= 50000 THEN 'E. $50K'
+            WHEN ytd_spending_usd >= 10000 THEN 'F. $10K'
+            WHEN ytd_spending_usd IS NOT NULL THEN 'G. <$10K'
         END AS ytd_tier,
 
         CASE WHEN total_spending_usd > 10000 THEN TRUE ELSE FALSE END AS is_over_10k
