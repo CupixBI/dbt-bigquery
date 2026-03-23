@@ -39,6 +39,10 @@ facilities AS (
     SELECT * FROM {{ ref('stg_tesla__facilities') }}
 ),
 
+cameras AS (
+    SELECT * FROM {{ ref('stg_tesla__cameras')}}
+),
+
 filtered AS(
     SELECT *
     FROM captures
@@ -94,7 +98,10 @@ final AS(
         teams.region_team_id,
 
         facilities.facility_name,
-        facilities.region_facility_id
+        facilities.region_facility_id,
+
+        cameras.camera_id,
+        cameras.model_name AS camera_model_name
 
     FROM filtered AS captures
     
@@ -115,6 +122,9 @@ final AS(
 
     LEFT JOIN cqa_editors cqa
         ON users.user_email = cqa.email
+
+    LEFT JOIN cameras
+        ON captures.camera_id = cameras.camera_id
 )
 
 SELECT * FROM final

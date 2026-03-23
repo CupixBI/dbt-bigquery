@@ -19,6 +19,7 @@ renamed AS (
         CAST(workspace_id as STRING) as workspace_id,
         CAST(user_id as STRING) as created_by_user_id,
         last_captured_at,
+        CAST(team_id as STRING) as team_id,
         
         -- [추가] sys 컬럼에서 address 키의 값만 추출 (JSON 파싱)
         -- JSON_EXTRACT_SCALAR(sys, '$.address') as facility_address
@@ -77,6 +78,23 @@ final AS (
             '-',
             workspace_id
         ) AS region_workspace_id,
+
+        team_id,
+
+        CONCAT(
+    CASE region
+        WHEN 'uswe2' THEN 'US'
+        WHEN 'apse2' THEN 'AU'
+        WHEN 'euce1' THEN 'EU'
+        WHEN 'apne1' THEN 'JP'
+        WHEN 'apse1' THEN 'SG'
+        WHEN 'cace1' THEN 'CA'
+        ELSE 'Unknown'
+    END,
+    '-',
+    team_id
+) AS region_team_id,
+        
         
         COALESCE(created_by_user_id, 'Unknown') AS created_by_user_id,
         last_captured_at
