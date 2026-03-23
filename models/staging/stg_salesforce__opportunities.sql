@@ -57,7 +57,7 @@ renamed AS (
         CAST(Site_Insights__c AS BOOLEAN) AS has_site_insights,
         DATE(Subscription_Start__c) AS subscription_start_date,
         DATE(Subscription_End__c) AS subscription_end_date,
-        CAST(Contract_Term_months__c AS INT64) AS contract_term_months,
+        DATE_DIFF(DATE(Subscription_End__c), DATE(Subscription_Start__c), MONTH) AS contract_term_months,
 
         -- 라이센스
         CAST(License_Capacity_Area__c AS FLOAT64) AS license_capacity_area,

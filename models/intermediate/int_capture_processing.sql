@@ -285,10 +285,11 @@ select
     *,
     case
         when video_length = 0 then '0 min'
-        when video_length < 360 then 'Under 6 min'
-        when video_length < 720 then '6–12 min'
-        when video_length < 1080 then '12–18 min'
-        else 'Over 18 min'
+        when video_length < 300 then '1 - 5 min'
+        when video_length < 600 then '5 – 10 min'
+        when video_length < 900 then '10 – 15 min'
+        when video_length < 1200 then '15 – 20 min'
+        else 'Over 20 min'
     end as video_length_range
 from filtered
 

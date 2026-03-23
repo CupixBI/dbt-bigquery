@@ -50,7 +50,8 @@ with
             cd.editor_level,
             cd.editor_work_part,
             cd.region as region,
-            cd.level_id
+            cd.level_id,
+            cd.camera_model_name
 
         from {{ ref("int_capture_processing") }} cp
         left join

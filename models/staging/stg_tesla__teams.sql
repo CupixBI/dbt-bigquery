@@ -36,7 +36,8 @@ renamed AS (
         
         CAST(quote_id as STRING) as quote_id,
         sf_resource_id,
-        timezone_offset
+        timezone_offset,
+        TIMESTAMP(infosphere_builtin_enabled_at) AS infosphere_builtin_enabled_at
     FROM teams_source
 ),
 
@@ -125,7 +126,9 @@ final AS (
         quote_id,
 
         COALESCE(sf_resource_id, 'Unknown') as sf_resource_id,
-        timezone_offset
+        timezone_offset,
+        infosphere_builtin_enabled_at,
+        infosphere_builtin_enabled_at IS NOT NULL AS infosphere_builtin_enablement
 
     FROM joined_users
 )
