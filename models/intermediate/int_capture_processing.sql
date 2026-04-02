@@ -86,6 +86,41 @@ refinement_times AS (
     GROUP BY capture_trace_id
 ),
 
+editing_created_at AS (
+    SELECT
+        captures.capture_trace_id,
+        COALESCE(
+            editings.created_at,
+            MIN(CASE WHEN capture_trace.stage LIKE '%editing_ready%' THEN capture_trace.timestamp END)
+        ) AS editing_created_at
+    FROM captures
+    LEFT JOIN editings
+        ON editings.editing_id = captures.editing_id
+        AND editings.tenant = captures.tenant
+        AND editings.region = captures.region
+    LEFT JOIN capture_trace
+        ON capture_trace.capture_trace_id = captures.capture_trace_id
+        AND capture_trace.tenant = captures.tenant
+    GROUP BY captures.capture_trace_id, editings.created_at
+),
+
+review_finished_cte AS (
+    SELECT
+        ct.capture_trace_id,
+        MIN(ct.timestamp) AS review_finished_at
+    FROM capture_trace ct
+    INNER JOIN (
+        SELECT 
+            capture_trace_id,
+            MAX(CASE WHEN stage LIKE '%editing_in_review%' THEN timestamp END) AS last_review_started_at
+        FROM capture_trace
+        GROUP BY capture_trace_id
+    ) r ON ct.capture_trace_id = r.capture_trace_id
+    WHERE (ct.stage LIKE '%editing_done%' OR ct.stage LIKE '%escalat%')
+    AND ct.timestamp > r.last_review_started_at
+    GROUP BY ct.capture_trace_id
+),
+
 final AS (
     SELECT
         captures.*,
@@ -147,7 +182,7 @@ final AS (
 
         MAX(CASE 
             WHEN capture_trace.stage LIKE '%editing_editing%' 
-            AND capture_trace.timestamp > editings.created_at
+            AND capture_trace.timestamp > editing_created_at.editing_created_at
             THEN capture_trace.timestamp 
         END) AS edit_started_at,
 
@@ -165,14 +200,14 @@ final AS (
                 END)
         END AS edit_finished_at,
 
-        MIN(CASE WHEN stage LIKE '%editing_in_review%' THEN timestamp END) AS review_started_at,
+        MAX(CASE WHEN stage LIKE '%editing_in_review%' THEN timestamp END) AS review_started_at,
 
         MAX(CASE WHEN capture_trace.stage LIKE '%processing_reconstruction_started%' THEN capture_trace.timestamp END) AS reconstruction_started_at,
         MAX(CASE WHEN capture_trace.stage LIKE '%processing_reconstruction_finished%' THEN capture_trace.timestamp END) AS reconstruction_finished_at,
 
         CASE 
             WHEN MAX(CASE WHEN capture_trace.stage LIKE '%editing_%review%' THEN 1 ELSE 0 END) = 1
-            THEN editings.state_updated_at  
+            THEN review_finished_cte.review_finished_at
             ELSE NULL
         END AS review_finished_at,
 
@@ -201,6 +236,10 @@ final AS (
         ON facilities.region_facility_id = captures.region_facility_id
         AND facilities.tenant = captures.tenant
     LEFT JOIN re_edit_requested on captures.region_capture_id = re_edit_requested.region_capture_id
+    LEFT JOIN editing_created_at
+    ON editing_created_at.capture_trace_id = captures.capture_trace_id
+    LEFT JOIN review_finished_cte
+    ON review_finished_cte.capture_trace_id = captures.capture_trace_id
     GROUP BY
         captures.tenant,
         captures.region,
@@ -225,6 +264,7 @@ final AS (
         captures.video_length,
         re_edit_requested.re_edit_count,
         re_edit_requested.last_re_edit_requested_at,
+        review_finished_cte.review_finished_at,
         editings.created_at,
         editings.state_updated_at,
         editings.updated_at,
