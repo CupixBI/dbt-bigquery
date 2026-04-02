@@ -20,12 +20,19 @@ with
 
             -- timestamps
             cp.uploading_finished_at,
+            cp.preprocessor_agent_started_at,
+            cp.preprocessor_agent_finished_at,
+            cp.postprocessor_agent_started_at,
             cp.postprocessor_agent_finished_at,
+            cp.postprocessor_agent_started_at_2nd,
+            cp.postprocessor_agent_finished_at_2nd,
             cp.preview_finished_at,
+            cp.editing_created_at,
             cp.edit_started_at,
             cp.edit_finished_at,
             cp.review_started_at,
             cp.review_finished_at,
+            cp.reconstruction_started_at,
             cp.reconstruction_finished_at,
 
             -- flags
@@ -79,9 +86,9 @@ with
 
             -- video_length_range
             CASE
-                WHEN cp.video_length < 5 THEN '~5min'
-                WHEN cp.video_length < 10 THEN '5~10min'
-                WHEN cp.video_length < 20 THEN '10~20min'
+                WHEN cp.video_length < 300 THEN '~5min'
+                WHEN cp.video_length < 600 THEN '5~10min'
+                WHEN cp.video_length < 1200 THEN '10~20min'
                 ELSE '20min~'
             END as video_length_range,
 

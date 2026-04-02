@@ -34,18 +34,17 @@ select uploading_finished_at, is_sla_exceeded, capture_type, team_name, region_t
 
 order by
   case stage
-    when 'uploading_to_processing_finished' then 1
-    when 'processing_finished_to_preview_finished' then 2
-    when 'preview_finished_to_edit_started' then 3
-    when 'edit_started_to_edit_finished' then 4
-    when 'edit_finished_to_review_started' then 5
-    when 'review_started_to_review_finished' then 6
-    when 'first_cpc_generation_duration' then 7
+    when '1. Upload → Processing' then 1
+    when '2. Processing → Preview' then 2
+    when '3. Preview → Edit Wait' then 3
+    when '4. Edit Duration' then 4
+    when '5. Edit → Review Wait' then 5
+    when '6. Review Duration' then 6
+    when '7. CPC Generation' then 7
   end,
   case video_length_range
-    when '0 min' then 1
-    when 'Under 6 min' then 2
-    when '6–12 min' then 3
-    when '12–18 min' then 4
-    when 'Over 18 min' then 5
+    when '~5min' then 1
+    when '5~10min' then 2
+    when '10~20min' then 3
+    when '20min~' then 4
   end
