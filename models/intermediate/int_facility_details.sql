@@ -15,9 +15,9 @@ final AS (
         -- 1. Facility (Grain)
         f.facility_id,
         f.facility_name,
+        f.tenant,
         -- f.facility_address,
         f.created_at AS facility_created_at,
-        
         -- Region 변환 로직
         f.region AS region,
 
@@ -53,10 +53,12 @@ final AS (
     -- Facility -> Workspace 조인
     LEFT JOIN workspaces w 
         ON f.region_workspace_id = w.region_workspace_id
+        AND f.tenant = w.tenant
         
     -- Workspace -> Team 조인
     LEFT JOIN teams t 
         ON w.region_team_id = t.region_team_id
+        AND w.tenant = t.tenant
 )
 
 SELECT * FROM final

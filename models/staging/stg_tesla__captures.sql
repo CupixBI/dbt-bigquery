@@ -29,6 +29,7 @@ renamed AS(
         expected_quality,
         CAST(facility_id as STRING) as facility_id,
         filesize,
+        tenant,
         CAST(level_id as STRING) as level_id,
         CAST(workspace_id as STRING) as workspace_id,
         CAST(team_id as STRING) as team_id,
@@ -63,7 +64,7 @@ renamed AS(
 
 -- users 참조 (user_email 조인용)
 users AS (
-    SELECT region, user_id, user_email
+    SELECT region, user_id, user_email, tenant
     FROM {{ ref('stg_tesla__users') }}
 ),
 
@@ -249,6 +250,7 @@ final AS (
         timezone_offset,
         upload_state,
         upload_state_updated_at,
+        renamed.tenant,
         
         -- User ID (NOT NULL) - 컬럼명 captured_by_user_id로 통일
         captured_by_user_id,
@@ -289,6 +291,7 @@ final AS (
     LEFT JOIN users
         ON renamed.region = users.region
         AND renamed.captured_by_user_id = users.user_id
+        AND renamed.tenant = users.tenant
 )
 
 SELECT * FROM final

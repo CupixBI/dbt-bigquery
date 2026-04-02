@@ -24,6 +24,7 @@ sources:
       - name: applied_products
       - name: groups
       - name: grouped_users
+      - name: sitetracks
 
   - name: monday  
     database: prism-485708  
@@ -68,4 +69,4 @@ sources:
     schema: seed_raw
     tables:
       - name: team_sf_account_mapping
-  
+

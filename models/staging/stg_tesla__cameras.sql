@@ -11,7 +11,8 @@ renamed AS(
         software,
         serial_number,
         state,
-        created_at
+        created_at,
+        tenant,
     FROM source
 ),
 
@@ -19,6 +20,7 @@ final AS(
     SELECT
         region,
         camera_id,
+        tenant,
         
         -- [Camera ID] Region Prefix
         CONCAT(
