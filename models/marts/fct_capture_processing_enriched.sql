@@ -100,7 +100,7 @@ with
             cd.level_id,
             cd.camera_model_name
 
-        from {{ ref("int_capture_processing_v2") }} cp
+        from {{ ref("int_capture_processing") }} cp
         left join {{ ref("int_capture_details") }} cd
             on cp.region_capture_id = cd.region_capture_id
             and cp.tenant = cd.tenant
