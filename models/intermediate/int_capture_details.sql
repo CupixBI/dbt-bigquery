@@ -5,7 +5,9 @@ WITH captures AS (
 users AS (
     SELECT 
         region_user_id,
-        user_email 
+        user_email ,
+        tenant,
+        region
     FROM {{ ref('stg_tesla__users') }}
 ),
 
@@ -43,6 +45,10 @@ cameras AS (
     SELECT * FROM {{ ref('stg_tesla__cameras')}}
 ),
 
+workspaces AS (
+    SELECT * FROM {{ ref('stg_tesla__workspaces') }}
+),
+
 filtered AS(
     SELECT *
     FROM captures
@@ -55,12 +61,14 @@ final AS(
     SELECT
         captures.region,
         captures.created_at,
+        captures.tenant,
         TIMESTAMP_ADD(captures.created_at, INTERVAL 9 HOUR) AS created_at_kst,
         captures.region_capture_id,
         captures.capture_trace_id,
         captures.region_capture_trace_id,
         captures.cycle_state,
         captures.editing_state,
+        captures.editing_id,
         captures.editor_id,
         captures.error_code,
         captures.reconstruction_state,
@@ -77,6 +85,7 @@ final AS(
         captures.video_length,
         captures.captured_by_user_email,
         captures.level_id,
+        captures.record_id,
 
         users.user_email AS editor_email,
         cqa.editor_name,
@@ -100,6 +109,9 @@ final AS(
         facilities.facility_name,
         facilities.region_facility_id,
 
+        workspaces.workspace_name,
+        workspaces.region_workspace_id,
+
         cameras.camera_id,
         cameras.model_name AS camera_model_name
 
@@ -113,18 +125,31 @@ final AS(
     
     LEFT JOIN teams
         ON captures.region_team_id = teams.region_team_id
+        AND captures.region = teams.region
+    AND captures.tenant = teams.tenant
         
     LEFT JOIN facilities
         ON captures.region_facility_id = facilities.region_facility_id
+        AND captures.region = facilities.region
+    AND captures.tenant = facilities.tenant
 
     LEFT JOIN users
         ON captures.region_editor_id = users.region_user_id
+        AND captures.region = users.region
+    AND captures.tenant = users.tenant
 
     LEFT JOIN cqa_editors cqa
         ON users.user_email = cqa.email
 
     LEFT JOIN cameras
         ON captures.camera_id = cameras.camera_id
+        AND captures.region = cameras.region
+    AND captures.tenant = cameras.tenant
+
+    LEFT JOIN workspaces
+        ON captures.region_workspace_id = workspaces.region_workspace_id
+        AND captures.region = workspaces.region
+        AND captures.tenant = workspaces.tenant
 )
 
 SELECT * FROM final

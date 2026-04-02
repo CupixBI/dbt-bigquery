@@ -24,6 +24,7 @@ renamed AS (
         current_sign_in_ip,
         last_sign_in_ip,
         slack_id,
+        tenant,
         TIMESTAMP(created_at) as created_at
     FROM source
 ),
@@ -85,7 +86,8 @@ final AS(
         current_sign_in_ip,
         last_sign_in_ip,
         COALESCE(slack_id, 'Unknown') as slack_id,
-        created_at
+        created_at,
+         tenant,
     FROM renamed
 )
 

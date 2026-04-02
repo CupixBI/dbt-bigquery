@@ -6,6 +6,7 @@ WITH source AS (
 renamed AS (
     SELECT 
         region,
+        tenant,
         CAST(_id as STRING) as workspace_id,
         name as workspace_name,
         CAST(user_id as STRING) as created_by_user_id,
@@ -30,6 +31,7 @@ final AS (
     SELECT
         region,
         workspace_id,
+        tenant,
         
         -- [Workspace ID] Region Prefix
         CONCAT(

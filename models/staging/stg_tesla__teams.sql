@@ -7,7 +7,8 @@ users_source AS (
     SELECT 
         _id, 
         region, 
-        email 
+        email,
+        tenant 
     FROM {{ source('tesla', 'users') }}
 ),
 
@@ -21,6 +22,7 @@ renamed AS (
         name as team_name,
         domain,
         state,
+        tenant,
         locale,
         lock_state,
         TIMESTAMP(lock_state_updated_at) AS lock_state_updated_at,
@@ -55,16 +57,19 @@ joined_users AS (
     LEFT JOIN users_source u_am
         ON t.account_manager_id = CAST(u_am._id AS STRING)
         AND t.region = u_am.region
+        AND t.tenant = u_am.tenant
 
     -- 2. Primary CSM Join
     LEFT JOIN users_source u_csm1
         ON t.primary_csm_id = CAST(u_csm1._id AS STRING)
         AND t.region = u_csm1.region
+        AND t.tenant = u_csm1.tenant
 
     -- 3. Secondary CSM Join
     LEFT JOIN users_source u_csm2
         ON t.secondary_csm_id = CAST(u_csm2._id AS STRING)
         AND t.region = u_csm2.region
+        AND t.tenant = u_csm2.tenant
 ),
 
 -- 3단계: Null 처리 및 파생 컬럼 생성
@@ -72,6 +77,7 @@ final AS (
     SELECT
         region,
         team_id,
+        tenant,
         -- Region Prefix 로직
         CONCAT(
             CASE region

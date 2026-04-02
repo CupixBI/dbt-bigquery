@@ -159,6 +159,16 @@ models:
       - name: region
         tests:
           - not_null
+
+  - name: stg_tesla__editings
+    description: "테슬라 cqa, sqa 작업 테이블"
+    columns:
+      - name: editing_id
+        tests:
+          - not_null
+      - name: region
+        tests:
+          - not_null
       
 
           

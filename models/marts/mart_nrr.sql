@@ -248,31 +248,100 @@ account_monthly_agg AS (
     LEFT JOIN account_meta m
         ON am.account_id = m.account_id
 )
+-- ============================================================
+-- [추가] 5. Churn 전용 row 생성
+--    is_churned = TRUE인 account의 churn 달에 active_mrr=0 row 추가
+-- ============================================================
+
+, churn_rows AS (
+    SELECT
+        DATE_TRUNC(
+            DATE_ADD(am.max_subscription_end_date, INTERVAL 3 MONTH), MONTH
+        )                                                           AS month_start,
+        FORMAT_DATE('%Y-%m', DATE_TRUNC(
+            DATE_ADD(am.max_subscription_end_date, INTERVAL 3 MONTH), MONTH
+        ))                                                          AS year_month,
+        EXTRACT(YEAR FROM DATE_TRUNC(
+            DATE_ADD(am.max_subscription_end_date, INTERVAL 3 MONTH), MONTH
+        ))                                                          AS year,
+        EXTRACT(MONTH FROM DATE_TRUNC(
+            DATE_ADD(am.max_subscription_end_date, INTERVAL 3 MONTH), MONTH
+        ))                                                          AS month,
+        am.account_id,
+        m.account_name,
+        m.market_segment,
+        m.owner_region,
+        m.owner_name,
+        m.owner_email,
+        0                                                           AS active_mrr,
+        0                                                           AS active_opp_count,
+        0                                                           AS new_mrr,
+        0                                                           AS renewal_mrr,
+        0                                                           AS expansion_mrr,
+        0                                                           AS contraction_mrr,
+        0                                                           AS reactivation_mrr,
+        0                                                           AS mid_expansion_mrr,
+        0                                                           AS mid_contraction_mrr,
+        am.active_mrr                                               AS churn_mrr,
+        1                                                           AS churned_account_count,
+        'Churn'                                                     AS period_type,
+        am.last_opp_id
+    FROM account_monthly_classified am
+    LEFT JOIN account_meta m ON am.account_id = m.account_id
+    WHERE am.is_churned = TRUE
+)
+
+-- SELECT
+--     month_start,
+--     year_month,
+--     year,
+--     month,
+--     account_id,
+--     account_name,
+--     market_segment,
+--     owner_region,
+--     owner_name,
+--     owner_email,
+--     active_mrr,
+--     active_opp_count,
+--     period_type,
+--     last_opp_id,
+--     new_mrr,
+--     renewal_mrr,
+--     expansion_mrr,
+--     contraction_mrr,
+--     reactivation_mrr,
+--     mid_expansion_mrr,
+--     mid_contraction_mrr,
+--     churn_mrr,
+--     churned_account_count,
+--     CURRENT_TIMESTAMP() AS updated_at
+
+-- FROM account_monthly_agg
+
+-- ============================================================
+-- [수정] 최종 SELECT: 기존 결과 + churn_rows UNION ALL
+-- ============================================================
+SELECT
+    month_start, year_month, year, month,
+    account_id, account_name, market_segment,
+    owner_region, owner_name, owner_email,
+    active_mrr, active_opp_count, period_type, last_opp_id,
+    new_mrr, renewal_mrr, expansion_mrr, contraction_mrr,
+    reactivation_mrr, mid_expansion_mrr, mid_contraction_mrr,
+    churn_mrr, churned_account_count,
+    CURRENT_TIMESTAMP() AS updated_at
+FROM account_monthly_agg
+
+UNION ALL
 
 SELECT
-    month_start,
-    year_month,
-    year,
-    month,
-    account_id,
-    account_name,
-    market_segment,
-    owner_region,
-    owner_name,
-    owner_email,
-    active_mrr,
-    active_opp_count,
-    period_type,
-    last_opp_id,
-    new_mrr,
-    renewal_mrr,
-    expansion_mrr,
-    contraction_mrr,
-    reactivation_mrr,
-    mid_expansion_mrr,
-    mid_contraction_mrr,
-    churn_mrr,
-    churned_account_count,
+    month_start, year_month, year, month,
+    account_id, account_name, market_segment,
+    owner_region, owner_name, owner_email,
+    active_mrr, active_opp_count, period_type, last_opp_id,
+    new_mrr, renewal_mrr, expansion_mrr, contraction_mrr,
+    reactivation_mrr, mid_expansion_mrr, mid_contraction_mrr,
+    churn_mrr, churned_account_count,
     CURRENT_TIMESTAMP() AS updated_at
-
-FROM account_monthly_agg
+FROM churn_rows

@@ -10,6 +10,7 @@ renamed AS (
         TIMESTAMP(created_at) as created_at, 
         state,
         cycle_state,
+        tenant,
         TIMESTAMP(cycle_state_updated_at) as cycle_state_updated_at,
         facility_size,
         facility_size_unit,
@@ -32,7 +33,7 @@ final AS (
     SELECT
         region,
         facility_id,
-        
+        tenant,
         -- Region Prefix
         CONCAT(
             CASE region

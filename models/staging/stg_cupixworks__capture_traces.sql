@@ -2,7 +2,8 @@ WITH capture_traces AS (
   SELECT
     id AS capture_trace_id,
     log_json,
-    region
+    region,
+    tenant,
   FROM {{ source('cupixworks', 'capture_traces') }}
 ),
 
@@ -47,7 +48,8 @@ final AS (
       INTERVAL 9 HOUR
     ) AS timestamp_kst,
     JSON_VALUE(log_json, '$.remark')                  AS stage,
-    log_json
+    log_json,
+    TRIM(REPLACE(tenant, '"', '')) AS tenant
   FROM deduped
 )
 
