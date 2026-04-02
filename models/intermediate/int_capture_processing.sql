@@ -165,7 +165,7 @@ final AS (
                 END)
         END AS edit_finished_at,
 
-        MIN(CASE WHEN stage LIKE '%editing_in_review%' THEN timestamp_kst END) AS review_started_at,
+        MIN(CASE WHEN stage LIKE '%editing_in_review%' THEN timestamp END) AS review_started_at,
 
         MAX(CASE WHEN capture_trace.stage LIKE '%processing_reconstruction_started%' THEN capture_trace.timestamp END) AS reconstruction_started_at,
         MAX(CASE WHEN capture_trace.stage LIKE '%processing_reconstruction_finished%' THEN capture_trace.timestamp END) AS reconstruction_finished_at,
