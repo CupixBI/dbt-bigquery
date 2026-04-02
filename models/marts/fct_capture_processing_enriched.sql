@@ -57,6 +57,7 @@ with
             TIMESTAMP_DIFF(cp.postprocessor_agent_finished_at, cp.uploading_finished_at, MINUTE) as uploading_to_processing_finished_min,
             TIMESTAMP_DIFF(cp.preview_finished_at, cp.postprocessor_agent_finished_at, MINUTE) as processing_finished_to_preview_finished_min,
             TIMESTAMP_DIFF(cp.edit_started_at, cp.preview_finished_at, MINUTE) as preview_finished_to_edit_started_min,
+            TIMESTAMP_DIFF(cp.edit_started_at, cp.postprocessor_agent_finished_at, MINUTE) as post_finished_to_edit_started_min,
             TIMESTAMP_DIFF(cp.edit_finished_at, cp.edit_started_at, MINUTE) as edit_started_to_edit_finished_min,
             TIMESTAMP_DIFF(cp.review_started_at, cp.edit_finished_at, MINUTE) as edit_finished_to_review_started_min,
             TIMESTAMP_DIFF(cp.review_finished_at, cp.review_started_at, MINUTE) as review_started_to_review_finished_min,
