@@ -18,8 +18,8 @@ captures AS (
         tenant,
         MAX(region_capture_id) AS region_capture_id,
         MAX(capture_type) AS capture_type,
-        MAX(created_at_kst) AS created_at_kst,
-        MAX(uploading_finished_at_kst) AS uploading_finished_at_kst
+        MAX(created_at) AS created_at,
+        MAX(uploading_finished_at) AS uploading_finished_at
     FROM {{ ref('int_capture_processing') }}
     GROUP BY record_id, region, tenant
 ),
@@ -68,8 +68,8 @@ final AS (
         END AS review_type,
         c.region_capture_id,
         c.capture_type,
-        c.created_at_kst AS capture_created_at,
-        c.uploading_finished_at_kst AS capture_uploading_finished_at,
+        c.created_at AS capture_created_at,
+        c.uploading_finished_at AS capture_uploading_finished_at,
         u.user_email AS editor_email,
         u.editor_level AS editor_level,
         CONCAT(u.firstname, ' ', u.lastname) AS editor_name

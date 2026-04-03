@@ -18,8 +18,8 @@ reviews AS (
 captures AS (
     SELECT 
         record_id,
-        MAX(uploading_finished_at_kst) AS uploading_finished_at_kst,
-        MAX(reconstruction_finished_at_kst) AS reconstruction_finished_at_kst
+        MAX(uploading_finished_at) AS uploading_finished_at,
+        MAX(reconstruction_finished_at) AS reconstruction_finished_at
     FROM {{ ref('int_capture_processing') }}
     WHERE record_id IS NOT NULL
     GROUP BY record_id
@@ -28,8 +28,8 @@ sitetracks AS (
     SELECT 
         level_id,
         record_id,
-        MAX(sitetrack_finished_at_kst) AS sitetrack_finished_at_kst,
-        MAX(sitetrack_started_at_kst) AS sitetrack_started_at_kst,
+        MAX(sitetrack_finished_at) AS sitetrack_finished_at,
+        MAX(sitetrack_started_at) AS sitetrack_started_at,
         MAX(error_code) AS error_code,
     FROM {{ ref('int_sitetracks') }}
     WHERE level_id IS NOT NULL AND record_id IS NOT NULL
@@ -41,10 +41,10 @@ final AS (
         e.*,
         
         -- CQA duration
-        TIMESTAMP_DIFF(c.reconstruction_finished_at_kst, c.uploading_finished_at_kst, MINUTE) AS cqa_duration_min,
+        TIMESTAMP_DIFF(c.reconstruction_finished_at, c.uploading_finished_at, MINUTE) AS cqa_duration_min,
         
         -- Sitetrack duration
-        TIMESTAMP_DIFF(s.sitetrack_finished_at_kst, s.sitetrack_started_at_kst, MINUTE) AS sitetrack_duration_min,
+        TIMESTAMP_DIFF(s.sitetrack_finished_at, s.sitetrack_started_at, MINUTE) AS sitetrack_duration_min,
         
         -- SQA duration
         TIMESTAMP_DIFF(
