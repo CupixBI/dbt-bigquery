@@ -48,6 +48,8 @@ final AS (
         TIMESTAMP_ADD(e.estimated_finish_at, INTERVAL 9 HOUR) AS estimated_finish_at_kst,
         e.state_updated_at,
         TIMESTAMP_ADD(e.state_updated_at, INTERVAL 9 HOUR) AS state_updated_at_kst,
+        e.updated_at,
+        TIMESTAMP_ADD(e.updated_at, INTERVAL 9 HOUR) AS updated_at_kst,
         e.assigned_at,
         TIMESTAMP_ADD(e.assigned_at, INTERVAL 9 HOUR) AS assigned_at_kst,
         e.state,
