@@ -9,10 +9,14 @@ reviews AS (
         parent_id,
         region,
         tenant,
-        TIMESTAMP_DIFF(state_updated_at, assigned_at, MINUTE) AS review_min
+        TIMESTAMP_DIFF(MAX(updated_at), MAX(created_at), MINUTE) AS review_min,
+        max(updated_at) as review_finished_at,
+        max(updated_at_kst) as review_finished_at_kst,
+        editor_email as reviewer_email,
     FROM {{ ref('int_editings') }}
     WHERE editing_type = 'review' 
       AND review_type = 'sqa_review'
+    GROUP BY parent_id, region, tenant, reviewer_email
 ),
 
 captures AS (
@@ -47,28 +51,24 @@ final AS (
         TIMESTAMP_DIFF(s.sitetrack_finished_at, s.sitetrack_started_at, MINUTE) AS sitetrack_duration_min,
         
         -- SQA duration
-        TIMESTAMP_DIFF(
-            CASE 
-                WHEN e.state IN ('done', 'holding') THEN e.state_updated_at
-                ELSE CURRENT_TIMESTAMP()
-            END,
-            e.created_at,
-            MINUTE
-        ) AS sqa_duration_min,
 
         -- 대기 시간: created_at → assigned_at
         TIMESTAMP_DIFF(e.assigned_at, e.created_at, Hour) AS sqa_queue_duration_hr,
-
-        -- 처리 시간: assigned_at → state_updated_at (or CURRENT_TIMESTAMP)
+        
+        -- 처리 시간: assigned_at → updated_at (or CURRENT_TIMESTAMP)
         TIMESTAMP_DIFF(
             CASE 
-                WHEN e.state IN ('done', 'holding') THEN e.state_updated_at
+                WHEN e.state IN ('done', 'holding') THEN e.updated_at
                 ELSE CURRENT_TIMESTAMP()
             END,
             e.assigned_at,
-            Hour
-        ) AS sqa_processing_duration_hr,
-        s.error_code
+            MINUTE
+        ) AS sqa_processing_duration_min,
+        s.error_code,
+
+        r.parent_id IS NOT NULL AS has_review_editing,
+        r.reviewer_email,
+
 
     FROM editings AS e
     LEFT JOIN captures AS c ON c.record_id = e.record_id
@@ -77,6 +77,7 @@ final AS (
         AND s.record_id = e.record_id
         AND e.level_id IS NOT NULL
         AND e.record_id IS NOT NULL
+    LEFT JOIN reviews AS r ON r.parent_id = e.editing_id
 )
 
 SELECT * FROM final
