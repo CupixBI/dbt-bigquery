@@ -53,7 +53,7 @@ final AS (
         -- SQA duration
 
         -- 대기 시간: created_at → assigned_at
-        TIMESTAMP_DIFF(e.assigned_at, e.created_at, Hour) AS sqa_queue_duration_hr,
+        TIMESTAMP_DIFF(e.assigned_at, e.created_at, MINUTE) AS sqa_queue_duration_min,
         
         -- 처리 시간: assigned_at → updated_at (or CURRENT_TIMESTAMP)
         TIMESTAMP_DIFF(
