@@ -51,6 +51,7 @@ capture_trace AS (
 editings AS (
     SELECT *
     FROM {{ ref('stg_tesla__editings') }}
+    WHERE editing_type != 'siteinsights'
 ),
 
 users AS (
@@ -107,7 +108,12 @@ editing_created_at AS (
 review_finished_cte AS (
     SELECT
         ct.capture_trace_id,
-        MIN(ct.timestamp) AS review_finished_at
+        MIN(CASE 
+            WHEN (ct.stage LIKE '%editing_done%' OR ct.stage LIKE '%escalat%')
+            AND ct.timestamp > r.last_review_started_at
+            THEN ct.timestamp 
+        END) AS review_finished_at,
+        r.last_review_started_at
     FROM capture_trace ct
     INNER JOIN (
         SELECT 
@@ -116,9 +122,8 @@ review_finished_cte AS (
         FROM capture_trace
         GROUP BY capture_trace_id
     ) r ON ct.capture_trace_id = r.capture_trace_id
-    WHERE (ct.stage LIKE '%editing_done%' OR ct.stage LIKE '%escalat%')
-    AND ct.timestamp > r.last_review_started_at
-    GROUP BY ct.capture_trace_id
+    WHERE r.last_review_started_at IS NOT NULL
+    GROUP BY ct.capture_trace_id, r.last_review_started_at
 ),
 
 final AS (
@@ -168,6 +173,7 @@ final AS (
         END) AS postprocessor_agent_finished_at_2nd,
 
         COALESCE(editings.created_at, MIN(CASE WHEN capture_trace.stage LIKE '%editing_ready%' THEN capture_trace.timestamp END)) AS editing_created_at,
+        editings.state as editing_state,
 
         MAX(CASE WHEN capture_trace.stage LIKE '%editing_%review%' THEN 1 ELSE 0 END) AS has_review,
 
@@ -207,14 +213,18 @@ final AS (
 
         CASE 
             WHEN MAX(CASE WHEN capture_trace.stage LIKE '%editing_%review%' THEN 1 ELSE 0 END) = 1
-            THEN review_finished_cte.review_finished_at
+            THEN COALESCE(
+                review_finished_cte.review_finished_at,
+                editings.updated_at  -- fallback: editing_done/escalat 없으면 updated_at 사용
+            )
             ELSE NULL
         END AS review_finished_at,
 
         users.user_email AS editor_email,
         facilities.facility_name,
         facilities.workspace_name,
-        facilities.team_name
+        facilities.team_name,
+        editings.preview_quality,
 
     FROM captures
     LEFT JOIN capture_trace
@@ -268,6 +278,8 @@ final AS (
         editings.created_at,
         editings.state_updated_at,
         editings.updated_at,
+        editings.preview_quality,
+        editings.state,
         users.user_email,
         facilities.facility_name,
         facilities.workspace_name,

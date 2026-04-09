@@ -42,7 +42,6 @@ renamed AS(
         TIMESTAMP(reconstruction_state_updated_at) as reconstruction_state_updated_at,
         CAST(record_id as STRING) as record_id,
         refinement_error_code,
-        refinement_floorplan_type,
         refinement_state,
         reprocess_count,
         running_state,
@@ -59,6 +58,7 @@ renamed AS(
         CAST(user_id as STRING) as captured_by_user_id,
         video_length,
         CAST(cupix_trace_id AS STRING) AS capture_trace_id,
+        refinement_floorplan_type,
     FROM filtered
 ),
 
@@ -242,7 +242,6 @@ final AS (
         ) AS region_record_id,
         
         refinement_error_code,
-        refinement_floorplan_type,
         reprocess_count,
         source_capture_id,
         spacetime_id,
@@ -286,6 +285,7 @@ final AS (
             '-',
             capture_trace_id
         ) AS region_capture_trace_id,
+        refinement_floorplan_type,
 
     FROM renamed
     LEFT JOIN users

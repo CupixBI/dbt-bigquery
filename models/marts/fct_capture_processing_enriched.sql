@@ -11,6 +11,7 @@ with
             cp.reconstruction_error_code,
             cp.editor_level,
             cp.editor_work_part,
+            cp.preview_quality,
 
             -- KST 변환
             datetime(cp.created_at, 'Asia/Seoul') as created_at_kst,
@@ -19,6 +20,7 @@ with
             datetime(cp.review_started_at, 'Asia/Seoul') as review_started_at_kst,
 
             -- timestamps
+            cp.created_at,
             cp.uploading_finished_at,
             cp.preprocessor_agent_started_at,
             cp.preprocessor_agent_finished_at,
@@ -77,7 +79,6 @@ with
             -- is_sla_exceeded (8시간 = 480분)
             TIMESTAMP_DIFF(
                 CASE
-                    WHEN cp.capture_type = '3D Map' THEN cp.reconstruction_finished_at
                     WHEN cp.has_review = 1 THEN cp.review_finished_at
                     ELSE cp.edit_finished_at
                 END,
@@ -106,7 +107,8 @@ with
             cd.editor_email,
             cd.region,
             cd.level_id,
-            cd.camera_model_name
+            cd.camera_model_name,
+            cd.editing_state
 
         from {{ ref("int_capture_processing") }} cp
         left join {{ ref("int_capture_details") }} cd

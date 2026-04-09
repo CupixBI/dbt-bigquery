@@ -30,6 +30,7 @@ renamed AS(
         CAST(parent_id as STRING) as parent_id,
         tenant,
         CAST(facility_id as STRING) as facility_id,
+        sys.preview_quality AS preview_quality,
         CAST(team_id as STRING) as team_id,
 
 
@@ -63,7 +64,7 @@ final AS(
         parent_id,
         tenant,
         facility_id,
-
+        preview_quality,
         team_id,
 
     FROM renamed
