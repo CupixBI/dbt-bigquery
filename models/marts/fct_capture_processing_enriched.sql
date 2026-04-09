@@ -18,6 +18,9 @@ with
             datetime(cp.uploading_finished_at, 'Asia/Seoul') as uploading_finished_at_kst,
             datetime(cp.edit_started_at, 'Asia/Seoul') as edit_started_at_kst,
             datetime(cp.review_started_at, 'Asia/Seoul') as review_started_at_kst,
+            datetime(cp.postprocessor_agent_finished_at, 'Asia/Seoul') as postprocessor_agent_finished_at_kst,
+            datetime(cp.postprocessor_agent_finished_at_2nd, 'Asia/Seoul') as postprocessor_agent_finished_at_2nd_kst,
+            datetime(cp.editing_created_at, 'Asia/Seoul') as editing_created_at_kst,
 
             -- timestamps
             cp.created_at,

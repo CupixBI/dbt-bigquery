@@ -46,6 +46,7 @@ sources:
       - name: cqa_labor_unit_cost_native
       - name: sqa_labor_unit_cost_native
       - name: exchange_rate
+      - name: cqa_shift_schedule_native
 
   - name: salesforce
     database: prism-485708
