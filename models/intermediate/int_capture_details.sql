@@ -67,6 +67,7 @@ final AS(
         captures.capture_trace_id,
         captures.region_capture_trace_id,
         captures.cycle_state,
+        captures.state,
         captures.editing_state,
         captures.editing_id,
         captures.editor_id,
