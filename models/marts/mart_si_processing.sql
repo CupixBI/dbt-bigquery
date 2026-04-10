@@ -22,11 +22,12 @@ reviews AS (
 captures AS (
     SELECT 
         record_id,
+        region,
         MAX(uploading_finished_at) AS uploading_finished_at,
         MAX(reconstruction_finished_at) AS reconstruction_finished_at
     FROM {{ ref('int_capture_processing') }}
     WHERE record_id IS NOT NULL
-    GROUP BY record_id
+    GROUP BY record_id, region
 ),
 sitetracks AS (
     SELECT 
@@ -71,7 +72,7 @@ final AS (
 
 
     FROM editings AS e
-    LEFT JOIN captures AS c ON c.record_id = e.record_id
+    LEFT JOIN captures AS c ON c.record_id = e.record_id and c.region = e.region
     LEFT JOIN sitetracks AS s
         ON s.level_id = e.level_id 
         AND s.record_id = e.record_id
