@@ -1,13 +1,13 @@
 /*
     mart_growth_mrr_monthly.sql
-    
+
     목적: Growth 대시보드용 월별 MRR 분배 테이블
-    
+
     Grain: Opportunity × Month (1 Opp = N개 월 행)
-    
+
     로직:
       - Closed Won + Invoiced Opp만 대상
-      - MRR = amount_usd ÷ (start~end 월수)
+      - MRR = amount_usd ÷ 계약 총 일수 × 해당 월 실제 계약 일수 (일할 계산)
       - subscription 기간을 월별로 펼침
 */
 
@@ -21,15 +21,25 @@ WITH mapped AS (
       AND amount_usd > 0
 ),
 
--- 월수 계산 + MRR 산출
+-- Account별 최신 대표값 (owner_region, industry)
+account_latest AS (
+    SELECT
+        account_id,
+        ARRAY_AGG(owner_region IGNORE NULLS ORDER BY subscription_start_date DESC LIMIT 1)[SAFE_OFFSET(0)] AS owner_region,
+        ARRAY_AGG(industry    IGNORE NULLS ORDER BY subscription_start_date DESC LIMIT 1)[SAFE_OFFSET(0)] AS industry
+    FROM mapped
+    GROUP BY account_id
+),
+
+-- 일수 계산 + 일할 단가 산출
 with_mrr AS (
     SELECT
         *,
-        DATE_DIFF(subscription_end_date, subscription_start_date, MONTH) AS contract_months,
+        DATE_DIFF(subscription_end_date, subscription_start_date, DAY) AS contract_days,
         SAFE_DIVIDE(
             amount_usd,
-            DATE_DIFF(subscription_end_date, subscription_start_date, MONTH)
-        ) AS monthly_mrr
+            DATE_DIFF(subscription_end_date, subscription_start_date, DAY)
+        ) AS daily_rate
     FROM mapped
 ),
 
@@ -61,8 +71,21 @@ final AS (
         w.amount,
         w.amount_usd,
         w.currency_code,
-        w.contract_months,
-        w.monthly_mrr,
+        w.contract_days,
+        w.daily_rate,
+        DATE_DIFF(
+            LEAST(w.subscription_end_date, DATE_ADD(m.month_start, INTERVAL 1 MONTH)),
+            GREATEST(w.subscription_start_date, m.month_start),
+            DAY
+        ) AS days_in_month,
+        SAFE_MULTIPLY(
+            w.daily_rate,
+            DATE_DIFF(
+                LEAST(w.subscription_end_date, DATE_ADD(m.month_start, INTERVAL 1 MONTH)),
+                GREATEST(w.subscription_start_date, m.month_start),
+                DAY
+            )
+        ) AS monthly_mrr,
         w.contract_type,
         w.subscription_start_date,
         w.subscription_end_date,
@@ -74,11 +97,11 @@ final AS (
         w.account_id,
         w.account_name,
         w.market_segment,
-        w.industry,
+        al.industry,
         w.territory,
 
         -- Region
-        w.owner_region,
+        al.owner_region,
 
         -- AE
         w.owner_name,
@@ -87,6 +110,8 @@ final AS (
     FROM month_spine m
     INNER JOIN with_mrr w
         ON m.opportunity_id = w.opportunity_id
+    LEFT JOIN account_latest al
+        ON w.account_id = al.account_id
 )
 
 SELECT * FROM final

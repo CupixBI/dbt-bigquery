@@ -88,6 +88,7 @@ final AS (
         -- close_date 기준 연/월 (트렌드 분석용)
         EXTRACT(YEAR FROM close_date) AS close_year,
         EXTRACT(MONTH FROM close_date) AS close_month,
+        EXTRACT(QUARTER FROM close_date) AS close_quarter,
         FORMAT_DATE('%Y-%m', close_date) AS close_year_month
 
     FROM mapped

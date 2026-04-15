@@ -41,6 +41,10 @@ account_year_agg AS (
         COUNT(*) AS deal_count,
         AVG(o.amount_usd) AS avg_deal_size_usd,
         AVG(o.contract_term_months) AS avg_contract_duration_months,
+        SAFE_DIVIDE(
+            SUM(o.amount_usd * o.contract_term_months),
+            SUM(o.amount_usd)
+        ) AS wavg_contract_duration_months,
 
         -- YTD 합계 (올해/작년만)
         SUM(

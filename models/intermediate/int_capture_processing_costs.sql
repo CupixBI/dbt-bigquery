@@ -13,11 +13,13 @@ WITH capture_processing AS (
     SELECT
         region_capture_id,
         video_length,
-        edit_started_to_edit_finished_min,
-        review_started_to_review_finished_min,
         uploading_finished_at,
         edit_started_at,
-        edit_finished_at
+        edit_finished_at,
+        review_started_at,
+        review_finished_at,
+        TIMESTAMP_DIFF(edit_finished_at, edit_started_at, MINUTE)     AS edit_started_to_edit_finished_min,
+        TIMESTAMP_DIFF(review_finished_at, review_started_at, MINUTE) AS review_started_to_review_finished_min
     FROM {{ ref('int_capture_processing') }}
 ),
 
