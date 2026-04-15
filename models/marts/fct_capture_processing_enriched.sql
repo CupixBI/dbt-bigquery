@@ -1,4 +1,26 @@
 with
+    cluster_agg as (
+        select
+            region_capture_id,
+            tenant,
+            min(skat_result_type) as cqa_refinement_selected_type,
+            countif(kind = 'sub') as sub_clusters_count,
+            countif(has_refinement_result) > 0 as refinement_result_exists
+        from {{ ref('stg_tesla__clusters') }}
+        group by region_capture_id, tenant
+    ),
+
+    floorplan_agg as (
+        select
+            region,
+            level_id,
+            tenant,
+            count(*) as floorplan_count,
+            countif(floorplan_type = 'bim') as bim_dwg_count
+        from {{ ref('stg_tesla__floorplans') }}
+        group by region, level_id, tenant
+    ),
+
     source as (
         select
             cp.region_capture_id,
@@ -111,12 +133,27 @@ with
             cd.region,
             cd.level_id,
             cd.camera_model_name,
-            cd.editing_state
+            cd.editing_state,
+
+            -- refinement info
+            cd.refinement_floorplan_type,
+            cluster_agg.cqa_refinement_selected_type,
+            coalesce(cluster_agg.sub_clusters_count, 0) as sub_clusters_count,
+            coalesce(floorplan_agg.floorplan_count, 0) as floorplan_count,
+            coalesce(floorplan_agg.bim_dwg_count, 0) as bim_dwg_count,
+            coalesce(cluster_agg.refinement_result_exists, false) as refinement_result_exists
 
         from {{ ref("int_capture_processing") }} cp
         left join {{ ref("int_capture_details") }} cd
             on cp.region_capture_id = cd.region_capture_id
             and cp.tenant = cd.tenant
+        left join cluster_agg
+            on cp.region_capture_id = cluster_agg.region_capture_id
+            and cp.tenant = cluster_agg.tenant
+        left join floorplan_agg
+            on cd.level_id = floorplan_agg.level_id
+            and cd.region = floorplan_agg.region
+            and cp.tenant = floorplan_agg.tenant
         where
             cp.pre_process_count > 0
             and cp.cycle_state = 'created'

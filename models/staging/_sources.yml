@@ -25,6 +25,8 @@ sources:
       - name: groups
       - name: grouped_users
       - name: sitetracks
+      - name: clusters
+      - name: floorplans
 
   - name: monday  
     database: prism-485708  
