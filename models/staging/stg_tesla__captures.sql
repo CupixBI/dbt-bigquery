@@ -58,7 +58,7 @@ renamed AS(
         CAST(user_id as STRING) as captured_by_user_id,
         video_length,
         CAST(cupix_trace_id AS STRING) AS capture_trace_id,
-        refinement_floorplan_type,
+        sys.refinement_floorplan_type AS refinement_floorplan_type,
     FROM filtered
 ),
 
