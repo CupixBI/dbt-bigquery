@@ -8,10 +8,10 @@
 ## 실행 명령어
 ```powershell
 # 컴파일만 (SQL 오류 체크)
-dbt compile --select <model_name>
+dbt compile --select "<model_name>"
 
 # 실행 (기본이 dev 환경)
-dbt run --select <model_name>
+dbt run --select "<model_name>"
 
 # 여러 모델 동시 실행
 dbt run --select stg_tesla__clusters stg_tesla__floorplans fct_capture_processing_enriched
