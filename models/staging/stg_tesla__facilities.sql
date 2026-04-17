@@ -21,7 +21,10 @@ renamed AS (
         CAST(user_id as STRING) as created_by_user_id,
         last_captured_at,
         CAST(team_id as STRING) as team_id,
-        
+        CAST(bim_id as STRING) as bim_id,
+        bims_count,
+        TIMESTAMP(bim_pack_added_at) as bim_pack_added_at,
+
         -- [추가] sys 컬럼에서 address 키의 값만 추출 (JSON 파싱)
         -- JSON_EXTRACT_SCALAR(sys, '$.address') as facility_address
         -- sys.address as facility_address
@@ -98,7 +101,10 @@ final AS (
         
         
         COALESCE(created_by_user_id, 'Unknown') AS created_by_user_id,
-        last_captured_at
+        last_captured_at,
+        bim_id,
+        bims_count,
+        bim_pack_added_at
     FROM renamed
 )
 
