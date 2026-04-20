@@ -19,7 +19,8 @@ renamed AS (
         users_count,
         cycle_state,
         TIMESTAMP(created_at) AS created_at,
-        TIMESTAMP(updated_at) AS updated_at
+        TIMESTAMP(updated_at) AS updated_at,
+        tenant
     FROM source
 )
 

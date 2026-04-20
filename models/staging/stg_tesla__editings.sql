@@ -63,6 +63,13 @@ final AS(
         capture_trace_id,
                 level_id,
         record_id,
+        CONCAT(
+            region_simplify,
+            '-',
+            record_id,
+            '-',
+            tenant
+        ) AS region_record_id,
         parent_id,
         tenant,
         facility_id,

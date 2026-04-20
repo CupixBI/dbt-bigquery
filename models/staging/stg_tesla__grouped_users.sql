@@ -15,7 +15,8 @@ renamed AS (
         CAST(group_id AS STRING) AS group_id,
         CAST(user_id AS STRING) AS user_id,
         TIMESTAMP(created_at) AS created_at,
-        TIMESTAMP(updated_at) AS updated_at
+        TIMESTAMP(updated_at) AS updated_at,
+        tenant
     FROM source
 )
 

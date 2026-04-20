@@ -12,16 +12,14 @@ users AS (
 ),
 
 captures AS (
-    SELECT 
-        record_id,
-        region,
-        tenant,
+    SELECT
+        region_record_id,
         MAX(region_capture_id) AS region_capture_id,
         MAX(capture_type) AS capture_type,
         MAX(created_at) AS created_at,
         MAX(uploading_finished_at) AS uploading_finished_at
     FROM {{ ref('int_capture_processing') }}
-    GROUP BY record_id, region, tenant
+    GROUP BY region_record_id
 ),
 
 facilities AS (
@@ -56,7 +54,7 @@ final AS (
         e.editor_id,
         e.editing_type,
         e.level_id,
-        e.record_id,
+        e.region_record_id,
         e.parent_id,
         e.facility_id AS project_id,
         f.facility_name AS project_name,
@@ -77,7 +75,7 @@ final AS (
         CONCAT(u.firstname, ' ', u.lastname) AS editor_name
     FROM editings AS e
     LEFT JOIN editings AS p ON p.editing_id = e.parent_id AND p.region = e.region  AND p.tenant = e.tenant  
-    LEFT JOIN captures AS c ON c.record_id = e.record_id AND c.tenant = e.tenant AND c.region = e.region
+    LEFT JOIN captures AS c ON c.region_record_id = e.region_record_id
     LEFT JOIN users AS u 
         ON u.user_id = e.editor_id
         AND u.region = e.region
