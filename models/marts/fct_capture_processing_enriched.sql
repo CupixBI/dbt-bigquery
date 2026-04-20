@@ -2,7 +2,6 @@ with
     cluster_agg as (
         select
             region_capture_id,
-            tenant,
             min(skat_result_type) as cqa_refinement_selected_type,
             countif(kind = 'sub') as sub_clusters_count,
             countif(has_refinement_result) > 0 as refinement_result_exists

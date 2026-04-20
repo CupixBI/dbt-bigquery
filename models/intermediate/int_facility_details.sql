@@ -51,14 +51,12 @@ final AS (
     FROM facilities f
     
     -- Facility -> Workspace 조인
-    LEFT JOIN workspaces w 
+    LEFT JOIN workspaces w
         ON f.region_workspace_id = w.region_workspace_id
-        AND f.tenant = w.tenant
-        
+
     -- Workspace -> Team 조인
-    LEFT JOIN teams t 
+    LEFT JOIN teams t
         ON w.region_team_id = t.region_team_id
-        AND w.tenant = t.tenant
 )
 
 SELECT * FROM final
