@@ -12,6 +12,7 @@ final AS (
         state_updated_at,
         TIMESTAMP_ADD(state_updated_at, INTERVAL 9 HOUR) AS state_updated_at_kst,
         record_id,
+        region_record_id,
         target_type,
         error_code,
         level_id,

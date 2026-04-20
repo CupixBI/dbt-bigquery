@@ -44,6 +44,7 @@ final AS (
         team_id,
         state_updated_at,
         record_id,
+        CONCAT(region, '-', record_id, '-', tenant) AS region_record_id,
         target_type,
         level_id,
         facility_id,

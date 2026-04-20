@@ -20,25 +20,24 @@ reviews AS (
 ),
 
 captures AS (
-    SELECT 
-        record_id,
-        region,
+    SELECT
+        region_record_id,
         MAX(uploading_finished_at) AS uploading_finished_at,
         MAX(reconstruction_finished_at) AS reconstruction_finished_at
     FROM {{ ref('int_capture_processing') }}
-    WHERE record_id IS NOT NULL
-    GROUP BY record_id, region
+    WHERE region_record_id IS NOT NULL
+    GROUP BY region_record_id
 ),
 sitetracks AS (
-    SELECT 
+    SELECT
         level_id,
-        record_id,
+        region_record_id,
         MAX(sitetrack_finished_at) AS sitetrack_finished_at,
         MAX(sitetrack_started_at) AS sitetrack_started_at,
         MAX(error_code) AS error_code,
     FROM {{ ref('int_sitetracks') }}
-    WHERE level_id IS NOT NULL AND record_id IS NOT NULL
-    GROUP BY level_id, record_id
+    WHERE level_id IS NOT NULL AND region_record_id IS NOT NULL
+    GROUP BY level_id, region_record_id
 ),
 
 final AS (
@@ -72,12 +71,12 @@ final AS (
 
 
     FROM editings AS e
-    LEFT JOIN captures AS c ON c.record_id = e.record_id and c.region = e.region
+    LEFT JOIN captures AS c ON c.region_record_id = e.region_record_id
     LEFT JOIN sitetracks AS s
-        ON s.level_id = e.level_id 
-        AND s.record_id = e.record_id
+        ON s.level_id = e.level_id
+        AND s.region_record_id = e.region_record_id
         AND e.level_id IS NOT NULL
-        AND e.record_id IS NOT NULL
+        AND e.region_record_id IS NOT NULL
     LEFT JOIN reviews AS r ON r.parent_id = e.editing_id
 )
 
