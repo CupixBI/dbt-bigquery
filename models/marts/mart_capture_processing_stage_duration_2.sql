@@ -1,15 +1,15 @@
 with base as (
     select
         region_capture_id,
-        record_id,
-        video_length,
-        uploading_finished_at,
-        video_length_range,
-        is_sla_exceeded,
-        capture_type,
-        team_name,
-        region_team_id,
+        region_record_id,
+        project_id as region_project_id,
         project_name,
+        region_team_id,
+        team_name,
+        capture_type,
+        video_length as video_length_sec,
+        video_length_range,
+        uploading_finished_at,
         postprocessor_agent_finished_at,
         preview_finished_at,
         edit_started_at,
@@ -21,21 +21,21 @@ with base as (
     from {{ ref('fct_capture_processing_enriched') }}
 )
 
-select region_capture_id, record_id, video_length, uploading_finished_at, is_sla_exceeded, capture_type, team_name, region_team_id, project_name, video_length_range, '1. Upload → Processing' as stage, TIMESTAMP_DIFF(postprocessor_agent_finished_at, uploading_finished_at, SECOND) as duration_sec from base
+select region_capture_id, region_record_id, region_project_id, project_name, region_team_id, team_name, capture_type, video_length_sec, video_length_range, uploading_finished_at, '1. Upload → Processing' as stage, TIMESTAMP_DIFF(postprocessor_agent_finished_at, uploading_finished_at, SECOND) as duration_sec from base
 union all
-select region_capture_id, record_id, video_length, uploading_finished_at, is_sla_exceeded, capture_type, team_name, region_team_id, project_name, video_length_range, '2. Processing → Preview' as stage, TIMESTAMP_DIFF(preview_finished_at, postprocessor_agent_finished_at, SECOND) as duration_sec from base
+select region_capture_id, region_record_id, region_project_id, project_name, region_team_id, team_name, capture_type, video_length_sec, video_length_range, uploading_finished_at, '2. Processing → Preview' as stage, TIMESTAMP_DIFF(preview_finished_at, postprocessor_agent_finished_at, SECOND) as duration_sec from base
 union all
-select region_capture_id, record_id, video_length, uploading_finished_at, is_sla_exceeded, capture_type, team_name, region_team_id, project_name, video_length_range, '3. Preview → Edit Wait' as stage, TIMESTAMP_DIFF(edit_started_at, preview_finished_at, SECOND) as duration_sec from base
+select region_capture_id, region_record_id, region_project_id, project_name, region_team_id, team_name, capture_type, video_length_sec, video_length_range, uploading_finished_at, '3. Preview → Edit Wait' as stage, TIMESTAMP_DIFF(edit_started_at, preview_finished_at, SECOND) as duration_sec from base
 union all
-select region_capture_id, record_id, video_length, uploading_finished_at, is_sla_exceeded, capture_type, team_name, region_team_id, project_name, video_length_range, '4. Edit Duration' as stage, TIMESTAMP_DIFF(edit_finished_at, edit_started_at, SECOND) as duration_sec from base
+select region_capture_id, region_record_id, region_project_id, project_name, region_team_id, team_name, capture_type, video_length_sec, video_length_range, uploading_finished_at, '4. Edit Duration' as stage, TIMESTAMP_DIFF(edit_finished_at, edit_started_at, SECOND) as duration_sec from base
 union all
-select region_capture_id, record_id, video_length, uploading_finished_at, is_sla_exceeded, capture_type, team_name, region_team_id, project_name, video_length_range, '5. Edit → Review Wait' as stage, TIMESTAMP_DIFF(review_started_at, edit_finished_at, SECOND) as duration_sec from base
+select region_capture_id, region_record_id, region_project_id, project_name, region_team_id, team_name, capture_type, video_length_sec, video_length_range, uploading_finished_at, '5. Edit → Review Wait' as stage, TIMESTAMP_DIFF(review_started_at, edit_finished_at, SECOND) as duration_sec from base
 union all
-select region_capture_id, record_id, video_length, uploading_finished_at, is_sla_exceeded, capture_type, team_name, region_team_id, project_name, video_length_range, '6. Review Duration' as stage, TIMESTAMP_DIFF(review_finished_at, review_started_at, SECOND) as duration_sec from base
+select region_capture_id, region_record_id, region_project_id, project_name, region_team_id, team_name, capture_type, video_length_sec, video_length_range, uploading_finished_at, '6. Review Duration' as stage, TIMESTAMP_DIFF(review_finished_at, review_started_at, SECOND) as duration_sec from base
 union all
-select region_capture_id, record_id, video_length, uploading_finished_at, is_sla_exceeded, capture_type, team_name, region_team_id, project_name, video_length_range, '7. CPC Wait' as stage, TIMESTAMP_DIFF(reconstruction_started_at, review_finished_at, SECOND) as duration_sec from base
+select region_capture_id, region_record_id, region_project_id, project_name, region_team_id, team_name, capture_type, video_length_sec, video_length_range, uploading_finished_at, '7. CPC Wait' as stage, TIMESTAMP_DIFF(reconstruction_started_at, review_finished_at, SECOND) as duration_sec from base
 union all
-select region_capture_id, record_id, video_length, uploading_finished_at, is_sla_exceeded, capture_type, team_name, region_team_id, project_name, video_length_range, '8. CPC Generation' as stage, TIMESTAMP_DIFF(reconstruction_finished_at, reconstruction_started_at, SECOND) as duration_sec from base
+select region_capture_id, region_record_id, region_project_id, project_name, region_team_id, team_name, capture_type, video_length_sec, video_length_range, uploading_finished_at, '8. CPC Generation' as stage, TIMESTAMP_DIFF(reconstruction_finished_at, reconstruction_started_at, SECOND) as duration_sec from base
 
 order by
   case stage

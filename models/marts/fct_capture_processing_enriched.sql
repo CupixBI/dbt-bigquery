@@ -27,7 +27,7 @@ with
             cp.region_capture_trace_id,
             cp.tenant,
             cp.capture_type,
-            cp.record_id,
+            cp.region_record_id,
             cp.video_length,
             cp.error_code,
             cp.reconstruction_error_code,

@@ -87,7 +87,7 @@ final AS(
         captures.video_length,
         captures.captured_by_user_email,
         captures.level_id,
-        captures.record_id,
+        captures.region_record_id,
 
         users.user_email AS editor_email,
         cqa.editor_name,
