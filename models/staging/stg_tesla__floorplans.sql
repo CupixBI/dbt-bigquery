@@ -32,6 +32,21 @@ final AS (
             tenant
         ) AS region_floorplan_id,
         level_id,
+        CONCAT(
+            CASE region
+                WHEN 'uswe2' THEN 'US'
+                WHEN 'apse2' THEN 'AU'
+                WHEN 'euce1' THEN 'EU'
+                WHEN 'apne1' THEN 'JP'
+                WHEN 'apse1' THEN 'SG'
+                WHEN 'cace1' THEN 'CA'
+                ELSE 'Unknown'
+            END,
+            '-',
+            level_id,
+            '-',
+            tenant
+        ) AS region_level_id,
         floorplan_type,
         tenant
     FROM renamed

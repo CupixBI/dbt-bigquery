@@ -7,18 +7,16 @@ with
             countif(kind = 'sub') as sub_clusters_count,
             countif(has_refinement_result) > 0 as refinement_result_exists
         from {{ ref('stg_tesla__clusters') }}
-        group by region_capture_id, tenant
+        group by region_capture_id
     ),
 
     floorplan_agg as (
         select
-            region,
-            level_id,
-            tenant,
+            region_level_id,
             count(*) as floorplan_count,
             countif(floorplan_type = 'bim') as bim_dwg_count
         from {{ ref('stg_tesla__floorplans') }}
-        group by region, level_id, tenant
+        group by region_level_id
     ),
 
     source as (
@@ -131,7 +129,7 @@ with
             cd.captured_by_user_email as creator,
             cd.editor_email,
             cd.region,
-            cd.level_id,
+            cd.region_level_id,
             cd.camera_model_name,
             cd.editing_state,
 
@@ -146,14 +144,10 @@ with
         from {{ ref("int_capture_processing") }} cp
         left join {{ ref("int_capture_details") }} cd
             on cp.region_capture_id = cd.region_capture_id
-            and cp.tenant = cd.tenant
         left join cluster_agg
             on cp.region_capture_id = cluster_agg.region_capture_id
-            and cp.tenant = cluster_agg.tenant
         left join floorplan_agg
-            on cd.level_id = floorplan_agg.level_id
-            and cd.region = floorplan_agg.region
-            and cp.tenant = floorplan_agg.tenant
+            on cd.region_level_id = floorplan_agg.region_level_id
         where
             cp.pre_process_count > 0
             and cp.cycle_state = 'created'
