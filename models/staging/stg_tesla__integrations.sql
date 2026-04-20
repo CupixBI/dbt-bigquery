@@ -13,7 +13,8 @@ renamed AS (
         integratable_type as integration_level,
         team_id,
         user_id,
-    FROM    
+        tenant,
+    FROM
         source
 ),
 
@@ -21,8 +22,9 @@ final AS(
     SELECT
         region,
         integration_id,
-        
-        -- [Level ID] Region Prefix
+        tenant,
+
+        -- [Integration ID] Region Prefix
         CONCAT(
             CASE region
                 WHEN 'uswe2' THEN 'US'
@@ -34,9 +36,11 @@ final AS(
                 ELSE 'Unknown'
             END,
             '-',
-            integration_id
+            integration_id,
+            '-',
+            tenant
         ) AS region_integration_id,
-        
+
         COALESCE(integration_target, 'Unknown') as integration_target,
         COALESCE(integration_level, 'Unknown') as integration_level,
 

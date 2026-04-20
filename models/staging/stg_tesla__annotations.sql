@@ -12,7 +12,8 @@ renamed AS (
         name as annotation_name,
         region,
         cycle_state,
-        state
+        state,
+        tenant
     FROM source
 ),
 
@@ -20,14 +21,15 @@ final AS (
     SELECT
         annotation_id,
         annotation_name,
-        region,  
+        region,
+        tenant,
         facility_id,
         created_at,
         user_id,
-        cycle_state,  
-        state,  
+        cycle_state,
+        state,
         CONCAT(
-            CASE region 
+            CASE region
                 WHEN 'uswe2' THEN 'US'
                 WHEN 'apse2' THEN 'AU'
                 WHEN 'euce1' THEN 'EU'
@@ -37,7 +39,9 @@ final AS (
                 ELSE 'Unknown'
             END,
             '-',
-            annotation_id
+            annotation_id,
+            '-',
+            tenant
         ) AS region_annotation_id
     FROM renamed
 )

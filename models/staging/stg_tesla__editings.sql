@@ -46,7 +46,9 @@ final AS(
         CONCAT(
             region_simplify,
             '-',
-            editing_id
+            editing_id,
+            '-',
+            tenant
         ) AS region_editing_id,
         
         stat_total_entities,

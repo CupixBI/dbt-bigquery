@@ -40,7 +40,9 @@ final AS (
                 ELSE 'Unknown'
             END,
             '-',
-            capture_trace_id
+            capture_trace_id,
+            '-',
+            TRIM(REPLACE(tenant, '"', ''))
         ) AS region_capture_trace_id,
     TIMESTAMP(JSON_VALUE(log_json, '$."@timestamp"')) AS timestamp,
     TIMESTAMP_ADD(

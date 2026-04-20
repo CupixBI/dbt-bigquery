@@ -45,7 +45,9 @@ final AS (
                 ELSE 'Unknown'
             END,
             '-',
-            workspace_id
+            workspace_id,
+            '-',
+            tenant
         ) AS region_workspace_id,
         
         COALESCE(workspace_name, 'Unknown') as workspace_name,
@@ -67,7 +69,9 @@ final AS (
                 ELSE 'Unknown'
             END,
             '-',
-            team_id
+            team_id,
+            '-',
+            tenant
         ) AS region_team_id,
         
         COALESCE(state, 'Unknown') as state,

@@ -1,16 +1,17 @@
 WITH cp AS (
-    SELECT 
-        region_capture_id, 
-        total_lead_time_min, 
-        cpc_delivery_lead_time_min, 
+    SELECT
+        region_capture_id,
+        tenant,
+        total_lead_time_min,
+        cpc_delivery_lead_time_min,
         sv_delivery_lead_time_min,
         reconstruction_process_count,
-        video_length    
+        video_length
     FROM {{ ref('int_capture_processing') }}
 ),
 
 capture_details AS (
-    SELECT region_capture_id, capture_type FROM {{ ref('int_capture_details') }}  
+    SELECT region_capture_id, tenant, capture_type FROM {{ ref('int_capture_details') }}
 ),
 
 joined AS (
@@ -22,7 +23,8 @@ joined AS (
         cp.reconstruction_process_count,
         cd.capture_type
     FROM cp
-    LEFT JOIN capture_details cd ON cp.region_capture_id = cd.region_capture_id
+    LEFT JOIN capture_details cd
+        ON cp.region_capture_id = cd.region_capture_id
 ),
 
 final AS (

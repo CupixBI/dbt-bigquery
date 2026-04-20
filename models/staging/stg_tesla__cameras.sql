@@ -34,7 +34,9 @@ final AS(
                 ELSE 'Unknown'
             END,
             '-',
-            camera_id
+            camera_id,
+            '-',
+            tenant
         ) AS region_camera_id,
         
         -- [수정] 큰따옴표(") -> 작은따옴표(') 통일 & 오타 수정

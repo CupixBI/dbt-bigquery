@@ -27,7 +27,9 @@ final AS (
                 ELSE 'Unknown'
             END,
             '-',
-            floorplan_id
+            floorplan_id,
+            '-',
+            tenant
         ) AS region_floorplan_id,
         level_id,
         floorplan_type,

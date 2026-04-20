@@ -78,7 +78,7 @@ with
             cp.preview_process_count,
             cp.review_process_count,
             cp.reconstruction_process_count,
-            cp.re_edit_count,
+            -- cp.re_edit_count, -- [DISABLED] region_capture_id 키 개편 후 재연결 필요
 
             -- duration 계산
             TIMESTAMP_DIFF(cp.postprocessor_agent_finished_at, cp.uploading_finished_at, MINUTE) as uploading_to_processing_finished_min,

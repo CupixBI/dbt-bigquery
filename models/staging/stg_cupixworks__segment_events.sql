@@ -53,7 +53,9 @@ renamed AS (
                         ELSE 'Unknown'
                     END,
                     '-',
-                    JSON_EXTRACT_SCALAR(event_json, '$.context.user_id')
+                    JSON_EXTRACT_SCALAR(event_json, '$.context.user_id'),
+                    '-',
+                    tenant
                 )
         END AS region_user_id,
         JSON_EXTRACT_SCALAR(event_json, '$.context.traits.user_email') AS user_email,
@@ -74,7 +76,9 @@ renamed AS (
                 ELSE 'Unknown'
             END,
             '-',
-            JSON_EXTRACT_SCALAR(event_json, '$.context.team_id')
+            JSON_EXTRACT_SCALAR(event_json, '$.context.team_id'),
+            '-',
+            tenant
         ) AS region_team_id,
         -- 워크스페이스 정보 (STRING)
         JSON_EXTRACT_SCALAR(event_json, '$.context.workspace_id') AS workspace_id,
@@ -91,7 +95,9 @@ renamed AS (
                         ELSE 'Unknown'
                     END,
                     '-',
-                    JSON_EXTRACT_SCALAR(event_json, '$.context.workspace_id')
+                    JSON_EXTRACT_SCALAR(event_json, '$.context.workspace_id'),
+                    '-',
+                    tenant
                 )
         END AS region_workspace_id,
         JSON_EXTRACT_SCALAR(event_json, '$.context.workspace_name') AS workspace_name,
@@ -112,7 +118,9 @@ renamed AS (
                         ELSE 'Unknown'
                     END,
                     '-',
-                    JSON_EXTRACT_SCALAR(event_json, '$.context.facilityId')
+                    JSON_EXTRACT_SCALAR(event_json, '$.context.facilityId'),
+                    '-',
+                    tenant
                 )
         END AS region_facility_id,
         JSON_EXTRACT_SCALAR(event_json, '$.context.project_id') AS project_id,

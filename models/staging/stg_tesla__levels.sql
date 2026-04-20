@@ -14,9 +14,10 @@ renamed AS(
         CAST(facility_id as STRING) as facility_id,
         
         -- [수정] 원본이 이미 TIMESTAMP이므로 함수 제거하고 그대로 사용
-        created_at, 
+        created_at,
         cycle_state,
-        cycle_state_updated_at
+        cycle_state_updated_at,
+        tenant
     FROM source
 ),
 
@@ -24,7 +25,8 @@ final AS(
     SELECT
         region,
         level_id,
-        
+        tenant,
+
         -- [Level ID] Region Prefix
         CONCAT(
             CASE region
@@ -37,7 +39,9 @@ final AS(
                 ELSE 'Unknown'
             END,
             '-',
-            level_id
+            level_id,
+            '-',
+            tenant
         ) AS region_level_id,
         
         COALESCE(level_name, 'Unknown') as level_name,
@@ -58,7 +62,9 @@ final AS(
                 ELSE 'Unknown'
             END,
             '-',
-            facility_id
+            facility_id,
+            '-',
+            tenant
         ) AS region_facility_id,
         
         created_at,

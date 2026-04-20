@@ -153,16 +153,19 @@ team_assigned_csms AS (
     SELECT
         g.team_id,
         g.region,
+        g.tenant,
         STRING_AGG(u.user_email, ', ' ORDER BY u.user_email) AS assigned_csm_emails
     FROM {{ ref('stg_tesla__groups') }} g
     INNER JOIN {{ ref('stg_tesla__grouped_users') }} gu
         ON g.group_id = gu.group_id
         AND g.region = gu.region
+        AND g.tenant = gu.tenant
     INNER JOIN {{ ref('stg_tesla__users') }} u
         ON gu.user_id = u.user_id
         AND gu.region = u.region
+        AND gu.tenant = u.tenant
     WHERE g.group_type_code = 'assigned_customer_success_managers'
-    GROUP BY 1, 2
+    GROUP BY 1, 2, 3
 ),
 
 -- 최종 조합

@@ -12,6 +12,7 @@
 WITH capture_processing AS (
     SELECT
         region_capture_id,
+        tenant,
         video_length,
         uploading_finished_at,
         edit_started_at,
@@ -26,6 +27,7 @@ WITH capture_processing AS (
 capture_details AS (
     SELECT
         region_capture_id,
+        tenant,
         region_team_id,
         editor_email,
         editor_level,

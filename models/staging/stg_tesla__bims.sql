@@ -11,7 +11,8 @@ renamed AS (
         region,
         CAST(facility_id as STRING) as facility_id,
         TIMESTAMP(created_at) as created_at,
-        cycle_state
+        cycle_state,
+        tenant
     FROM source
 ),
 
@@ -20,6 +21,7 @@ final AS (
         bim_id,
         name,
         region,
+        tenant,
         facility_id,
         created_at,
         cycle_state,
@@ -34,7 +36,9 @@ final AS (
                 ELSE 'Unknown'
             END,
             '-',
-            bim_id
+            bim_id,
+            '-',
+            tenant
         ) AS region_bim_id
     FROM renamed
 )

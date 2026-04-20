@@ -3,10 +3,11 @@ WITH facilities AS (
 ),
 
 teams AS (
-    SELECT 
+    SELECT
         region_team_id,
+        tenant,
         infosphere_builtin_enabled_at,
-        infosphere_builtin_enablement, 
+        infosphere_builtin_enablement,
         lock_state
     FROM {{ ref('stg_tesla__teams') }}
 ),
@@ -18,7 +19,8 @@ final AS (
         t.lock_state,
         t.infosphere_builtin_enabled_at
     FROM facilities f
-    LEFT JOIN teams t ON f.region_team_id = t.region_team_id
+    LEFT JOIN teams t
+        ON f.region_team_id = t.region_team_id
 )
 
 SELECT * from final

@@ -46,7 +46,9 @@ final AS(
                 ELSE 'Unknown'
             END,
             '-',
-            user_id
+            user_id,
+            '-',
+            tenant
         ) AS region_user_id,
 
         -- [Team ID] Region Prefix
@@ -62,7 +64,9 @@ final AS(
                 ELSE 'Unknown'
             END,
             '-',
-            team_id
+            team_id,
+            '-',
+            tenant
         ) AS region_team_id,
 
         COALESCE(user_email, 'Unknown') as user_email,

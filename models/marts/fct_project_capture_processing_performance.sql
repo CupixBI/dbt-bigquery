@@ -35,7 +35,7 @@ project_level AS (
 
         COUNT(DISTINCT CASE
             WHEN post_process_count >= 3
-              OR re_edit_count > 0
+              -- OR re_edit_count > 0  -- [DISABLED] region_capture_id 키 개편 후 재연결 필요
               OR reconstruction_process_count > 1
             THEN region_capture_id
         END) AS rework_captures,

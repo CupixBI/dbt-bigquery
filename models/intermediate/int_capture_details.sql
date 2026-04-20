@@ -15,23 +15,24 @@ cqa_editors AS (
     SELECT * FROM {{ ref('stg_finance__cqa_editors') }} 
 ),
 
-capture_issues_agg AS (
-    SELECT 
-        region_capture_id,
-        STRING_AGG(DISTINCT issue_name, ', ') AS issue_names, 
-        STRING_AGG(issue_code, ', ') AS issue_codes
-    FROM {{ ref('stg_monday__capture_issues') }}
-    GROUP BY 1
-),
+-- [DISABLED] tenant 미포함 외부 소스 — region_capture_id 키 개편 후 재연결 필요
+-- capture_issues_agg AS (
+--     SELECT
+--         region_capture_id,
+--         STRING_AGG(DISTINCT issue_name, ', ') AS issue_names,
+--         STRING_AGG(issue_code, ', ') AS issue_codes
+--     FROM {{ ref('stg_monday__capture_issues') }}
+--     GROUP BY 1
+-- ),
 
-re_edit_requested AS (
-    SELECT
-        region_capture_id, 
-        COUNT(*) AS re_edit_count, 
-        MAX(created_at) AS last_requested_at 
-    FROM {{ ref('stg_slack__re_edit_requested') }}
-    GROUP BY 1
-),
+-- re_edit_requested AS (
+--     SELECT
+--         region_capture_id,
+--         COUNT(*) AS re_edit_count,
+--         MAX(created_at) AS last_requested_at
+--     FROM {{ ref('stg_slack__re_edit_requested') }}
+--     GROUP BY 1
+-- ),
 
 teams AS (
     SELECT * FROM {{ ref('stg_tesla__teams') }}
@@ -94,15 +95,15 @@ final AS(
         cqa.work_part AS editor_work_part,
         cqa.unit_price AS editor_unit_price,
 
-        capture_issues_agg.issue_names,
-        capture_issues_agg.issue_codes,
-
-        COALESCE(re_edit_requested.re_edit_count, 0) as re_edit_count,
-        re_edit_requested.last_requested_at,
-        CASE 
-            WHEN re_edit_requested.re_edit_count > 0 THEN TRUE 
-            ELSE FALSE 
-        END AS is_re_edited,
+        -- [DISABLED] tenant 미포함 외부 소스 — region_capture_id 키 개편 후 재연결 필요
+        -- capture_issues_agg.issue_names,
+        -- capture_issues_agg.issue_codes,
+        -- COALESCE(re_edit_requested.re_edit_count, 0) as re_edit_count,
+        -- re_edit_requested.last_requested_at,
+        -- CASE
+        --     WHEN re_edit_requested.re_edit_count > 0 THEN TRUE
+        --     ELSE FALSE
+        -- END AS is_re_edited,
         
         teams.team_name,
         teams.region_team_id,
@@ -118,39 +119,29 @@ final AS(
 
     FROM filtered AS captures
     
-    LEFT JOIN re_edit_requested
-        ON captures.region_capture_id = re_edit_requested.region_capture_id
-
-    LEFT JOIN capture_issues_agg
-        ON captures.region_capture_id = capture_issues_agg.region_capture_id
+    -- [DISABLED] tenant 미포함 외부 소스 — region_capture_id 키 개편 후 재연결 필요
+    -- LEFT JOIN re_edit_requested
+    --     ON captures.region_capture_id = re_edit_requested.region_capture_id
+    -- LEFT JOIN capture_issues_agg
+    --     ON captures.region_capture_id = capture_issues_agg.region_capture_id
     
     LEFT JOIN teams
         ON captures.region_team_id = teams.region_team_id
-        AND captures.region = teams.region
-    AND captures.tenant = teams.tenant
-        
+
     LEFT JOIN facilities
         ON captures.region_facility_id = facilities.region_facility_id
-        AND captures.region = facilities.region
-    AND captures.tenant = facilities.tenant
 
     LEFT JOIN users
         ON captures.region_editor_id = users.region_user_id
-        AND captures.region = users.region
-    AND captures.tenant = users.tenant
 
     LEFT JOIN cqa_editors cqa
         ON users.user_email = cqa.email
 
     LEFT JOIN cameras
-        ON captures.camera_id = cameras.camera_id
-        AND captures.region = cameras.region
-    AND captures.tenant = cameras.tenant
+        ON captures.region_camera_id = cameras.region_camera_id
 
     LEFT JOIN workspaces
         ON captures.region_workspace_id = workspaces.region_workspace_id
-        AND captures.region = workspaces.region
-        AND captures.tenant = workspaces.tenant
 )
 
 SELECT * FROM final

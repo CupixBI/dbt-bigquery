@@ -85,7 +85,9 @@ final AS (
                 ELSE 'Unknown'
             END,
             '-',
-            capture_id
+            capture_id,
+            '-',
+            renamed.tenant
         ) AS region_capture_id,
         
         captured_at,
@@ -104,7 +106,9 @@ final AS (
                 ELSE 'Unknown'
             END,
             '-',
-            camera_id
+            camera_id,
+            '-',
+            renamed.tenant
         ) AS region_camera_id,
         
         editing_entity_id,
@@ -121,7 +125,9 @@ final AS (
                 ELSE 'Unknown'
             END,
             '-',
-            editor_id
+            editor_id,
+            '-',
+            renamed.tenant
         ) AS region_editor_id,
         
         -- [2] 상태(State) 값 (데이터 누락 가능성이 있다면 COALESCE 유지 추천)
@@ -159,7 +165,9 @@ final AS (
                 ELSE 'Unknown'
             END,
             '-',
-            facility_id
+            facility_id,
+            '-',
+            renamed.tenant
         ) AS region_facility_id,
         
         -- Level ID (NOT NULL)
@@ -175,7 +183,9 @@ final AS (
                 ELSE 'Unknown'
             END,
             '-',
-            level_id
+            level_id,
+            '-',
+            renamed.tenant
         ) AS region_level_id,
         
         -- Workspace ID (NOT NULL)
@@ -191,7 +201,9 @@ final AS (
                 ELSE 'Unknown'
             END,
             '-',
-            workspace_id
+            workspace_id,
+            '-',
+            renamed.tenant
         ) AS region_workspace_id,
         
         -- Team ID (NOT NULL)
@@ -207,7 +219,9 @@ final AS (
                 ELSE 'Unknown'
             END,
             '-',
-            renamed.team_id
+            renamed.team_id,
+            '-',
+            renamed.tenant
         ) AS region_team_id,
         
         -- Capture Name & Type
@@ -238,7 +252,9 @@ final AS (
                 ELSE 'Unknown'
             END,
             '-',
-            record_id
+            record_id,
+            '-',
+            renamed.tenant
         ) AS region_record_id,
         
         refinement_error_code,
@@ -264,7 +280,9 @@ final AS (
                 ELSE 'Unknown'
             END,
             '-',
-            captured_by_user_id
+            captured_by_user_id,
+            '-',
+            renamed.tenant
         ) AS region_captured_by_user_id,
         
         -- [추가] user_email (users 테이블에서 조인)
@@ -283,7 +301,9 @@ final AS (
                 ELSE 'Unknown'
             END,
             '-',
-            capture_trace_id
+            capture_trace_id,
+            '-',
+            renamed.tenant
         ) AS region_capture_trace_id,
         refinement_floorplan_type,
 

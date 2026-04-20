@@ -29,7 +29,9 @@ renamed AS(
                     INTERVAL CAST(contract_months AS INT64) MONTH
                 )
             )
-        END AS billing_expires_at
+        END AS billing_expires_at,
+
+        tenant
 
     FROM source
 ),
@@ -38,7 +40,8 @@ final AS (
     SELECT
         region,
         quote_id,
-        
+        tenant,
+
         -- Region Prefix (다른 테이블들과의 조인 키)
         CONCAT(
             CASE region
@@ -51,7 +54,9 @@ final AS (
                 ELSE 'Unknown'
             END,
             '-',
-            quote_id
+            quote_id,
+            '-',
+            tenant
         ) AS region_quote_id,
         
         billable_id,
@@ -66,7 +71,9 @@ final AS (
                 ELSE 'Unknown'
             END,
             '-',
-            billable_id
+            billable_id,
+            '-',
+            tenant
         ) AS region_billable_id,
 
         billable_type,
@@ -93,7 +100,9 @@ final AS (
                 ELSE 'Unknown'
             END,
             '-',
-            created_by_user_id
+            created_by_user_id,
+            '-',
+            tenant
         ) AS region_created_by_user_id
 
     FROM renamed

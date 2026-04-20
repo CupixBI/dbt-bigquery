@@ -3,23 +3,24 @@ WITH events AS (
 ),
 
 facilities AS (
-    SELECT 
+    SELECT
         region_facility_id,
         facility_name,
-
+        tenant
     FROM {{ ref('int_facility_details') }}
 ),
 
 teams AS (
-    SELECT 
-    region_team_id,
-           account_manager_email,
+    SELECT
+        region_team_id,
+        tenant,
+        account_manager_email,
         primary_csm_email,
         secondary_csm_email,
         team_name,
         lock_state,
-        infosphere_builtin_enabled_at,
-    FROM {{ ref('stg_tesla__teams')}}
+        infosphere_builtin_enabled_at
+    FROM {{ ref('stg_tesla__teams') }}
 ),
 
 

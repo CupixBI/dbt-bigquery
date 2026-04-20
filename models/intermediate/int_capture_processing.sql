@@ -37,10 +37,8 @@ facilities AS (
     FROM {{ ref('stg_tesla__facilities') }} f
     LEFT JOIN {{ ref('stg_tesla__workspaces') }} w
         ON f.region_workspace_id = w.region_workspace_id
-        AND f.tenant = w.tenant
     LEFT JOIN {{ ref('stg_tesla__teams') }} t
         ON w.region_team_id = t.region_team_id
-        AND w.tenant = t.tenant
 ),
 
 capture_trace AS (
@@ -70,14 +68,15 @@ editing_started AS (
     GROUP BY capture_trace_id
 ),
 
-re_edit_requested as (
-        select
-            region_capture_id,
-            count(*) as re_edit_count,
-            max(created_at) as last_re_edit_requested_at
-        from {{ ref("stg_slack__re_edit_requested") }}
-        group by 1
-    ),
+-- [DISABLED] tenant 미포함 외부 소스 — region_capture_id 키 개편 후 재연결 필요
+-- re_edit_requested as (
+--     select
+--         region_capture_id,
+--         count(*) as re_edit_count,
+--         max(created_at) as last_re_edit_requested_at
+--     from {{ ref("stg_slack__re_edit_requested") }}
+--     group by 1
+-- ),
 
 refinement_times AS (
     SELECT
@@ -140,9 +139,10 @@ final AS (
         COUNTIF(capture_trace.stage LIKE '%hold%') > 0 AS is_holded,
         COUNTIF(capture_trace.stage LIKE '%escalat%') > 0 AS is_escalated,
         COUNTIF(capture_trace.stage LIKE '%editing_skipped%') > 0 AS editing_skipped,
-        coalesce(re_edit_requested.re_edit_count, 0) > 0 as is_re_edited,
-        coalesce(re_edit_requested.re_edit_count, 0) as re_edit_count,
-        re_edit_requested.last_re_edit_requested_at,
+        -- [DISABLED] tenant 미포함 외부 소스 — region_capture_id 키 개편 후 재연결 필요
+        -- coalesce(re_edit_requested.re_edit_count, 0) > 0 as is_re_edited,
+        -- coalesce(re_edit_requested.re_edit_count, 0) as re_edit_count,
+        -- re_edit_requested.last_re_edit_requested_at,
 
         countif(capture_trace.stage like '%preprocessor_agent_finished%') as pre_process_count,
         countif(capture_trace.stage like '%skat_master_finished%') as master_process_count,
@@ -244,8 +244,8 @@ final AS (
         ON refinement_times.capture_trace_id = captures.capture_trace_id
     LEFT JOIN facilities
         ON facilities.region_facility_id = captures.region_facility_id
-        AND facilities.tenant = captures.tenant
-    LEFT JOIN re_edit_requested on captures.region_capture_id = re_edit_requested.region_capture_id
+    -- [DISABLED] tenant 미포함 외부 소스 — region_capture_id 키 개편 후 재연결 필요
+    -- LEFT JOIN re_edit_requested on captures.region_capture_id = re_edit_requested.region_capture_id
     LEFT JOIN editing_created_at
     ON editing_created_at.capture_trace_id = captures.capture_trace_id
     LEFT JOIN review_finished_cte
@@ -272,8 +272,8 @@ final AS (
         captures.region_team_id,
         captures.level_id,
         captures.video_length,
-        re_edit_requested.re_edit_count,
-        re_edit_requested.last_re_edit_requested_at,
+        -- re_edit_requested.re_edit_count,
+        -- re_edit_requested.last_re_edit_requested_at,
         review_finished_cte.review_finished_at,
         editings.created_at,
         editings.state_updated_at,

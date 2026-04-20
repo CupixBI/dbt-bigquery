@@ -49,7 +49,9 @@ final AS (
                 ELSE 'Unknown'
             END,
             '-',
-            facility_id
+            facility_id,
+            '-',
+            tenant
         ) AS region_facility_id,
         
         COALESCE(facility_name, 'Unknown') AS facility_name,
@@ -80,7 +82,9 @@ final AS (
                 ELSE 'Unknown'
             END,
             '-',
-            workspace_id
+            workspace_id,
+            '-',
+            tenant
         ) AS region_workspace_id,
 
         team_id,
@@ -96,7 +100,9 @@ final AS (
         ELSE 'Unknown'
     END,
     '-',
-    team_id
+    team_id,
+    '-',
+    tenant
 ) AS region_team_id,
         
         

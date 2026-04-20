@@ -29,7 +29,9 @@ final AS (
                 ELSE 'Unknown'
             END,
             '-',
-            cluster_id
+            cluster_id,
+            '-',
+            tenant
         ) AS region_cluster_id,
         capture_id,
         CONCAT(
@@ -43,7 +45,9 @@ final AS (
                 ELSE 'Unknown'
             END,
             '-',
-            capture_id
+            capture_id,
+            '-',
+            tenant
         ) AS region_capture_id,
         kind,
         skat_result_type,

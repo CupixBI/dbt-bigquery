@@ -29,7 +29,8 @@ renamed AS (
         sys.revision,
         TIMESTAMP(done_at) as done_at,
         error_code,
-        progress
+        progress,
+        tenant
     FROM source
 ),
 
@@ -37,7 +38,8 @@ final AS (
     SELECT
         region,
         sitetrack_id,
-        CONCAT(region, '-', sitetrack_id) AS region_sitetrack_id,
+        tenant,
+        CONCAT(region, '-', sitetrack_id, '-', tenant) AS region_sitetrack_id,
         processing_status,
         team_id,
         state_updated_at,

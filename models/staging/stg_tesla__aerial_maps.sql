@@ -136,7 +136,9 @@ final as (
                 else 'Unknown'
             end,
             '-',
-            aerial_map_id
+            aerial_map_id,
+            '-',
+            tenant
         ) as region_aerial_map_id,
 
         key,
@@ -159,7 +161,9 @@ final as (
                 else 'Unknown'
             end,
             '-',
-            facility_id
+            facility_id,
+            '-',
+            tenant
         ) as region_facility_id,
 
         workspace_id,
@@ -174,7 +178,9 @@ final as (
                 else 'Unknown'
             end,
             '-',
-            workspace_id
+            workspace_id,
+            '-',
+            tenant
         ) as region_workspace_id,
 
         team_id,
@@ -189,7 +195,9 @@ final as (
                 else 'Unknown'
             end,
             '-',
-            team_id
+            team_id,
+            '-',
+            tenant
         ) as region_team_id,
 
         user_id,
@@ -204,7 +212,9 @@ final as (
                 else 'Unknown'
             end,
             '-',
-            user_id
+            user_id,
+            '-',
+            tenant
         ) as region_user_id,
 
         pix4d_project_id,

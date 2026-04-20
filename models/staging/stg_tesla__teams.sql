@@ -90,7 +90,9 @@ final AS (
                 ELSE 'Unknown'
             END,
             '-',
-            team_id
+            team_id,
+            '-',
+            tenant
         ) AS region_team_id,
         created_at,
         updated_at,
