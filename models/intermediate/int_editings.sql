@@ -1,5 +1,6 @@
 WITH editings AS (
     SELECT * FROM {{ ref('stg_tesla__editings') }}
+    WHERE cycle_state = 'created'
 ),
 
 users AS (
@@ -51,6 +52,7 @@ final AS (
         e.assigned_at,
         TIMESTAMP_ADD(e.assigned_at, INTERVAL 9 HOUR) AS assigned_at_kst,
         e.state,
+        e.cycle_state,
         e.editor_id,
         e.editing_type,
         e.level_id,
