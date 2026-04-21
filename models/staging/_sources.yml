@@ -27,6 +27,8 @@ sources:
       - name: sitetracks
       - name: clusters
       - name: floorplans
+      - name: element_traces
+      - name: statuses
 
   - name: monday  
     database: prism-485708  
