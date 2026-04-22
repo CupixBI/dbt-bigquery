@@ -8,6 +8,7 @@ renamed AS (
         CAST(_id AS STRING) AS floorplan_id,
         CAST(level_id AS STRING) AS level_id,
         floorplan_type,
+        TIMESTAMP(created_at) AS floorplan_created_at,
         tenant
     FROM source
 ),
@@ -48,6 +49,7 @@ final AS (
             tenant
         ) AS region_level_id,
         floorplan_type,
+        floorplan_created_at,
         tenant
     FROM renamed
 )
