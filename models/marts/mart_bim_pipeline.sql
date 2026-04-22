@@ -16,7 +16,9 @@ final as (
         bim_floorplan_created_at,
 
         -- Phase 1: 모수 파악
+        bims_count > 0                                                          as is_bim_facility,
         bim_dwg_count > 0                                                       as is_bim_level,
+        bims_count,
         bim_dwg_count,
         floorplan_count,
 

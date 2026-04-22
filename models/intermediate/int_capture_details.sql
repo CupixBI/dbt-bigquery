@@ -110,6 +110,7 @@ final AS(
 
         facilities.facility_name,
         facilities.region_facility_id,
+        facilities.bims_count,
 
         workspaces.workspace_name,
         workspaces.region_workspace_id,

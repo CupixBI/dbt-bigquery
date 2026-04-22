@@ -126,6 +126,7 @@ with
             cd.region_team_id,
             cd.facility_name as project_name,
             cd.region_facility_id as project_id,
+            cd.bims_count,
             cd.captured_by_user_email as creator,
             cd.editor_email,
             cd.region,
