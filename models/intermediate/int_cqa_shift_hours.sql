@@ -2,31 +2,15 @@ WITH shift_schedule AS (
     SELECT * FROM {{ ref('stg_finance__cqa_shift_schedule') }}
 ),
 
-editors AS (
-    SELECT * FROM {{ ref('stg_finance__cqa_editors') }}
-),
-
-headcount AS (
-    SELECT
-        work_part,
-        COUNT(*) AS headcount
-    FROM editors
-    GROUP BY work_part
-),
-
 days AS (
     SELECT
-        s.work_part,
-        s.work_day,
-        s.work_started,
-        s.work_finished,
-        s.break_started,
-        s.break_finished,
-        s.break_headcount,
-        COALESCE(h.headcount, 0) AS headcount,
+        work_part,
+        editor_level,
+        work_started,
+        work_finished,
+        headcount,
         day_num
-    FROM shift_schedule s
-    LEFT JOIN headcount h USING (work_part)
+    FROM shift_schedule
     CROSS JOIN UNNEST(
         CASE work_day
             WHEN 'Mon-Fri'  THEN [1,2,3,4,5]
@@ -46,10 +30,10 @@ hours AS (
 final AS (
     SELECT
         work_part,
+        editor_level,
         day_num,
         hour,
         MAX(headcount) AS headcount,
-        -- 근무 시간 여부 (행마다 동일하므로 ANY_VALUE 사용)
         ANY_VALUE(
             CASE
                 WHEN work_finished <= 24
@@ -57,30 +41,16 @@ final AS (
                 ELSE
                     hour >= work_started OR hour < (work_finished - 24)
             END
-        ) AS is_working,
-        -- 브레이크 여러 행 중 하나라도 해당되면 true
-        LOGICAL_OR(
-            CASE
-                WHEN break_finished <= 24
-                    THEN hour >= break_started AND hour < break_finished
-                ELSE
-                    hour >= break_started OR hour < (break_finished - 24)
-            END
-        ) AS is_on_break,
-        -- 브레이크 중 남은 인원 (가장 적은 값)
-        MIN(break_headcount) AS break_headcount
+        ) AS is_working
     FROM hours
-    GROUP BY work_part, day_num, hour
+    GROUP BY work_part, editor_level, day_num, hour
 )
 
 SELECT
     work_part,
+    editor_level,
     day_num,
     hour,
-    CASE
-        WHEN NOT is_working THEN 0
-        WHEN is_on_break THEN break_headcount
-        ELSE headcount
-    END AS available_headcount
+    headcount AS available_headcount
 FROM final
 WHERE is_working

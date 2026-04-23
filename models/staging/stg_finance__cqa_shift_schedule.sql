@@ -8,12 +8,12 @@ renamed AS (
     SELECT
         work_part,
         work_day,
+        editor_level,
         CAST(work_started AS INT64) AS work_started,
         CAST(work_finished AS INT64) AS work_finished,
         CAST(break_started AS FLOAT64) AS break_started,
         CAST(break_finished AS FLOAT64) AS break_finished,
-        CAST(headcount AS INT64) AS headcount,
-        CAST(breakheadcount AS INT64) AS break_headcount
+        CAST(headcount AS INT64) AS headcount
     FROM source
 )
 
