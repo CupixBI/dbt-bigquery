@@ -141,6 +141,7 @@ renamed AS (
         -- properties (track 이벤트용)
         JSON_EXTRACT_SCALAR(event_json, '$.properties.type') AS property_type,
         JSON_EXTRACT_SCALAR(event_json, '$.properties.model') AS property_model,
+        JSON_EXTRACT_SCALAR(event_json, '$.properties.kind') AS property_kind,
         JSON_EXTRACT_SCALAR(event_json, '$.properties.id') AS property_id,
         JSON_EXTRACT_SCALAR(event_json, '$.properties.action') AS property_action
 

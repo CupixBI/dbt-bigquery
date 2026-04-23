@@ -107,7 +107,9 @@ final AS (
                 ELSE 'Unknown'
             END,
             '-',
-            facility_id
+            facility_id,
+            '-',
+            tenant
         ) AS region_facility_id,
 
         team_id,
@@ -122,7 +124,9 @@ final AS (
                 ELSE 'Unknown'
             END,
             '-',
-            team_id
+            team_id,
+            '-',
+            tenant
         ) AS region_team_id,
 
         workspace_id,

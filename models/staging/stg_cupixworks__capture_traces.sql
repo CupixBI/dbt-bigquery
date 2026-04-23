@@ -50,6 +50,9 @@ final AS (
       INTERVAL 9 HOUR
     ) AS timestamp_kst,
     JSON_VALUE(log_json, '$.remark')                  AS stage,
+    JSON_VALUE(log_json, '$.class_name')              AS class_name,
+    JSON_VALUE(log_json, '$.class')                   AS class,
+    REGEXP_EXTRACT(JSON_VALUE(log_json, '$.message'), r'editor_name: ([^)]+)') AS editor_name,
     log_json,
     TRIM(REPLACE(tenant, '"', '')) AS tenant
   FROM deduped

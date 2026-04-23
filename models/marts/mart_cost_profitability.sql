@@ -65,6 +65,8 @@ team_monthly_cost AS (
     GROUP BY 1, 2
 ),
 
+
+
 account_monthly_cost AS (
     SELECT
         atm.account_id,
@@ -72,7 +74,7 @@ account_monthly_cost AS (
         SUM(tc.total_processing_cost) AS total_processing_cost,
         SUM(tc.total_editing_cost) AS total_editing_cost,
         SUM(tc.total_cost) AS total_cost,
-        SUM(tc.capture_count) AS capture_count
+        SUM(tc.capture_count) AS capture_count,
     FROM team_monthly_cost tc
     INNER JOIN account_team_mapping atm
         ON tc.region_team_id = atm.region_team_id
