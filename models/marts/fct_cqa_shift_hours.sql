@@ -3,11 +3,11 @@ WITH shift_hours AS (
 )
 
 SELECT
+    editor_name,
     work_part,
     editor_level,
+    location,
     day_num,
-    hour,
-    SUM(available_headcount) AS total_available_headcount
+    hour
 FROM shift_hours
-GROUP BY 1, 2, 3, 4
-ORDER BY 1, 2, 3, 4
+ORDER BY work_part, day_num, hour, editor_name

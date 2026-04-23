@@ -1,16 +1,46 @@
-WITH shift_schedule AS (
-    SELECT * FROM {{ ref('stg_finance__cqa_shift_schedule') }}
+WITH editors AS (
+    SELECT
+        editor_name,
+        work_part,
+        level AS editor_level,
+        location
+    FROM {{ ref('stg_finance__cqa_editors') }}
+),
+
+shift_schedule AS (
+    SELECT
+        work_part,
+        work_day,
+        work_started,
+        work_finished
+    FROM {{ ref('stg_finance__cqa_shift_schedule') }}
+    GROUP BY work_part, work_day, work_started, work_finished
+),
+
+editor_schedule AS (
+    SELECT
+        e.editor_name,
+        e.work_part,
+        e.editor_level,
+        e.location,
+        s.work_day,
+        s.work_started,
+        s.work_finished
+    FROM editors e
+    LEFT JOIN shift_schedule s
+        ON e.work_part = s.work_part
 ),
 
 days AS (
     SELECT
+        editor_name,
         work_part,
         editor_level,
+        location,
         work_started,
         work_finished,
-        headcount,
         day_num
-    FROM shift_schedule
+    FROM editor_schedule
     CROSS JOIN UNNEST(
         CASE work_day
             WHEN 'Mon-Fri'  THEN [1,2,3,4,5]
@@ -25,32 +55,20 @@ hours AS (
     SELECT *
     FROM days
     CROSS JOIN UNNEST(GENERATE_ARRAY(0, 23)) AS hour
-),
-
-final AS (
-    SELECT
-        work_part,
-        editor_level,
-        day_num,
-        hour,
-        MAX(headcount) AS headcount,
-        ANY_VALUE(
-            CASE
-                WHEN work_finished <= 24
-                    THEN hour >= work_started AND hour < work_finished
-                ELSE
-                    hour >= work_started OR hour < (work_finished - 24)
-            END
-        ) AS is_working
-    FROM hours
-    GROUP BY work_part, editor_level, day_num, hour
 )
 
 SELECT
+    editor_name,
     work_part,
     editor_level,
+    location,
     day_num,
-    hour,
-    headcount AS available_headcount
-FROM final
-WHERE is_working
+    hour
+FROM hours
+WHERE
+    CASE
+        WHEN work_finished <= 24
+            THEN hour >= work_started AND hour < work_finished
+        ELSE
+            hour >= work_started OR hour < (work_finished - 24)
+    END
