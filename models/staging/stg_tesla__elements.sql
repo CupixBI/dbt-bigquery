@@ -98,6 +98,66 @@ final AS (
             '-',
             tenant
         ) AS region_team_id,
+        CONCAT(
+            CASE region
+                WHEN 'uswe2' THEN 'US'
+                WHEN 'apse2' THEN 'AU'
+                WHEN 'euce1' THEN 'EU'
+                WHEN 'apne1' THEN 'JP'
+                WHEN 'apse1' THEN 'SG'
+                WHEN 'cace1' THEN 'CA'
+                ELSE 'Unknown'
+            END,
+            '-',
+            workspace_id,
+            '-',
+            tenant
+        ) AS region_workspace_id,
+        CONCAT(
+            CASE region
+                WHEN 'uswe2' THEN 'US'
+                WHEN 'apse2' THEN 'AU'
+                WHEN 'euce1' THEN 'EU'
+                WHEN 'apne1' THEN 'JP'
+                WHEN 'apse1' THEN 'SG'
+                WHEN 'cace1' THEN 'CA'
+                ELSE 'Unknown'
+            END,
+            '-',
+            level_id,
+            '-',
+            tenant
+        ) AS region_level_id,
+        CONCAT(
+            CASE region
+                WHEN 'uswe2' THEN 'US'
+                WHEN 'apse2' THEN 'AU'
+                WHEN 'euce1' THEN 'EU'
+                WHEN 'apne1' THEN 'JP'
+                WHEN 'apse1' THEN 'SG'
+                WHEN 'cace1' THEN 'CA'
+                ELSE 'Unknown'
+            END,
+            '-',
+            user_id,
+            '-',
+            tenant
+        ) AS region_user_id,
+        CONCAT(
+            CASE region
+                WHEN 'uswe2' THEN 'US'
+                WHEN 'apse2' THEN 'AU'
+                WHEN 'euce1' THEN 'EU'
+                WHEN 'apne1' THEN 'JP'
+                WHEN 'apse1' THEN 'SG'
+                WHEN 'cace1' THEN 'CA'
+                ELSE 'Unknown'
+            END,
+            '-',
+            bim_id,
+            '-',
+            tenant
+        ) AS region_bim_id,
         id,
         tenant,
         facility_id,
