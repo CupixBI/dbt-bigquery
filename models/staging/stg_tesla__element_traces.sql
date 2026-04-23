@@ -54,7 +54,9 @@ final AS (
                 ELSE 'Unknown'
             END,
             '-',
-            element_trace_id
+            element_trace_id,
+            '-',
+            tenant
         ) AS region_element_trace_id,
 
         id,
@@ -77,7 +79,9 @@ final AS (
                 ELSE 'Unknown'
             END,
             '-',
-            deviation_id
+            deviation_id,
+            '-',
+            tenant
         ) AS region_deviation_id,
 
         element_id,
@@ -92,7 +96,9 @@ final AS (
                 ELSE 'Unknown'
             END,
             '-',
-            element_id
+            element_id,
+            '-',
+            tenant
         ) AS region_element_id,
 
         facility_id,
@@ -141,7 +147,9 @@ final AS (
                 ELSE 'Unknown'
             END,
             '-',
-            workspace_id
+            workspace_id,
+            '-',
+            tenant
         ) AS region_workspace_id,
 
         user_id,
@@ -156,7 +164,9 @@ final AS (
                 ELSE 'Unknown'
             END,
             '-',
-            user_id
+            user_id,
+            '-',
+            tenant
         ) AS region_user_id,
 
         record_id,
@@ -171,7 +181,9 @@ final AS (
                 ELSE 'Unknown'
             END,
             '-',
-            record_id
+            record_id,
+            '-',
+            tenant
         ) AS region_record_id,
 
         sitetrack_id,
@@ -186,7 +198,9 @@ final AS (
                 ELSE 'Unknown'
             END,
             '-',
-            sitetrack_id
+            sitetrack_id,
+            '-',
+            tenant
         ) AS region_sitetrack_id,
 
         category_id,
@@ -204,7 +218,9 @@ final AS (
                 ELSE 'Unknown'
             END,
             '-',
-            estimated_status_id
+            estimated_status_id,
+            '-',
+            tenant
         ) AS region_estimated_status_id,
         workarea_id,
         status_id,
@@ -219,7 +235,9 @@ final AS (
                 ELSE 'Unknown'
             END,
             '-',
-            status_id
+            status_id,
+            '-',
+            tenant
         ) AS region_status_id,
         vendor_id,
         texture_id,

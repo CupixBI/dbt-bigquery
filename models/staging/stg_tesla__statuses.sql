@@ -43,7 +43,9 @@ final AS (
                 ELSE 'Unknown'
             END,
             '-',
-            status_id
+            status_id,
+            '-',
+            tenant
         ) AS region_status_id,
 
         id,
@@ -70,7 +72,9 @@ final AS (
                 ELSE 'Unknown'
             END,
             '-',
-            team_id
+            team_id,
+            '-',
+            tenant
         ) AS region_team_id,
 
         user_id,
@@ -85,7 +89,9 @@ final AS (
                 ELSE 'Unknown'
             END,
             '-',
-            user_id
+            user_id,
+            '-',
+            tenant
         ) AS region_user_id,
 
         workflow_id,
@@ -100,7 +106,9 @@ final AS (
                 ELSE 'Unknown'
             END,
             '-',
-            workflow_id
+            workflow_id,
+            '-',
+            tenant
         ) AS region_workflow_id,
 
         row_order,

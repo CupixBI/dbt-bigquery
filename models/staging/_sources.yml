@@ -28,6 +28,7 @@ sources:
       - name: clusters
       - name: floorplans
       - name: element_traces
+      - name: elements
       - name: statuses
 
   - name: monday  
