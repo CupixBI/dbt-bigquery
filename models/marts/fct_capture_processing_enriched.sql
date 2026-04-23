@@ -13,7 +13,8 @@ with
         select
             region_level_id,
             count(*) as floorplan_count,
-            countif(floorplan_type = 'bim') as bim_dwg_count
+            countif(floorplan_type = 'bim') as bim_dwg_count,
+            min(case when floorplan_type = 'bim' then floorplan_created_at end) as bim_floorplan_created_at
         from {{ ref('stg_tesla__floorplans') }}
         group by region_level_id
     ),
@@ -125,6 +126,7 @@ with
             cd.region_team_id,
             cd.facility_name as project_name,
             cd.region_facility_id as project_id,
+            cd.bims_count,
             cd.captured_by_user_email as creator,
             cd.editor_email,
             cd.region,
@@ -138,6 +140,8 @@ with
             coalesce(cluster_agg.sub_clusters_count, 0) as sub_clusters_count,
             coalesce(floorplan_agg.floorplan_count, 0) as floorplan_count,
             coalesce(floorplan_agg.bim_dwg_count, 0) as bim_dwg_count,
+            floorplan_agg.bim_floorplan_created_at,
+            cp.uploading_finished_at > floorplan_agg.bim_floorplan_created_at as is_captured_after_bim_created,
             coalesce(cluster_agg.refinement_result_exists, false) as refinement_result_exists
 
         from {{ ref("int_capture_processing") }} cp
