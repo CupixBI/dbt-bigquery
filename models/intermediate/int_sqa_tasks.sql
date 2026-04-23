@@ -5,8 +5,8 @@ WITH capture_traces AS (
 final AS (
     SELECT *
     FROM capture_traces
-    WHERE class_name = 'Editing'
-       OR class = 'Editing'
+    WHERE (class_name = 'Editing' OR class = 'Editing')
+      AND lower(stage) LIKE '%editing_%'
 )
 
 SELECT * FROM final
