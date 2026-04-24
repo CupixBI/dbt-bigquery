@@ -53,7 +53,7 @@ final AS (
     JSON_VALUE(log_json, '$.class_name')              AS class_name,
     JSON_VALUE(log_json, '$.class')                   AS class,
     REGEXP_EXTRACT(JSON_VALUE(log_json, '$.message'), r'editor_name: ([^)]+)') AS editor_name,
-    JSON_VALUE(log_json, '$.editor_id')                  AS editor_id,
+    REGEXP_EXTRACT(JSON_VALUE(log_json, '$.message'), r'editor_id: (\d+)')    AS editor_id,
     log_json,
     TRIM(REPLACE(tenant, '"', '')) AS tenant
   FROM deduped
