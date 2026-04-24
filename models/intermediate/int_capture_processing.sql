@@ -294,7 +294,7 @@ final AS (
         facilities.facility_name,
         facilities.workspace_name,
         facilities.team_name
-)
+),
 
 final_with_trace_editor AS (
     SELECT
