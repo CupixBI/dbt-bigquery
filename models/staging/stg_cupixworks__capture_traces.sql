@@ -54,6 +54,24 @@ final AS (
     JSON_VALUE(log_json, '$.class')                   AS class,
     REGEXP_EXTRACT(JSON_VALUE(log_json, '$.message'), r'editor_name: ([^)]+)') AS editor_name,
     REGEXP_EXTRACT(JSON_VALUE(log_json, '$.message'), r'editor_id: (\d+)')    AS editor_id,
+    CASE
+        WHEN REGEXP_EXTRACT(JSON_VALUE(log_json, '$.message'), r'editor_id: (\d+)') IS NOT NULL
+        THEN CONCAT(
+            CASE region
+                WHEN 'uswe2' THEN 'US'
+                WHEN 'apse2' THEN 'AU'
+                WHEN 'euce1' THEN 'EU'
+                WHEN 'apne1' THEN 'JP'
+                WHEN 'apse1' THEN 'SG'
+                WHEN 'cace1' THEN 'CA'
+                ELSE 'Unknown'
+            END,
+            '-',
+            REGEXP_EXTRACT(JSON_VALUE(log_json, '$.message'), r'editor_id: (\d+)'),
+            '-',
+            TRIM(REPLACE(tenant, '"', ''))
+        )
+    END AS region_editor_id,
     log_json,
     TRIM(REPLACE(tenant, '"', '')) AS tenant
   FROM deduped

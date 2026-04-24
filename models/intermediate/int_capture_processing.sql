@@ -108,14 +108,14 @@ editing_editor_id AS (
     SELECT
         capture_trace_id,
         tenant,
-        latest.editor_id   AS trace_editor_id,
-        latest.editor_name AS trace_editor_name
+        latest.region_editor_id AS trace_region_editor_id,
+        latest.editor_name      AS trace_editor_name
     FROM (
         SELECT
             capture_trace_id,
             tenant,
             ARRAY_AGG(
-                STRUCT(editor_id, editor_name)
+                STRUCT(region_editor_id, editor_name)
                 ORDER BY timestamp DESC
                 LIMIT 1
             )[SAFE_OFFSET(0)] AS latest
@@ -317,9 +317,7 @@ final_with_trace_editor AS (
         ON f.capture_trace_id = ee.capture_trace_id
         AND f.tenant = ee.tenant
     LEFT JOIN users u
-        ON u.user_id = ee.trace_editor_id
-        AND u.tenant = f.tenant
-        AND u.region = f.region
+        ON u.region_user_id = ee.trace_region_editor_id
 )
 
 SELECT * FROM final_with_trace_editor
