@@ -89,6 +89,7 @@ final AS(
         captures.region_level_id,
         captures.region_record_id,
 
+        captures.region_editor_id,
         users.user_email AS editor_email,
         cqa.editor_name,
         cqa.level AS editor_level,

@@ -124,6 +124,7 @@ with
             -- 메타데이터
             cd.team_name,
             cd.region_team_id,
+            cd.region_editor_id,
             cd.facility_name as project_name,
             cd.region_facility_id as project_id,
             cd.bims_count,
