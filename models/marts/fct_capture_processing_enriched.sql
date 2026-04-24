@@ -128,11 +128,7 @@ with
             cd.region_facility_id as project_id,
             cd.bims_count,
             cd.captured_by_user_email as creator,
-            CASE
-                WHEN cp.edit_started_at >= TIMESTAMP('2026-03-17')
-                THEN cp.trace_editor_email
-                ELSE cd.editor_email
-            END AS editor_email,
+            cd.editor_email,
             CASE
                 WHEN cp.edit_started_at >= TIMESTAMP('2026-03-17')
                 THEN cp.trace_editor_name
