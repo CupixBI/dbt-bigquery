@@ -133,6 +133,11 @@ with
                 THEN cp.trace_editor_email
                 ELSE cd.editor_email
             END AS editor_email,
+            CASE
+                WHEN cp.edit_started_at >= TIMESTAMP('2026-03-17')
+                THEN cp.trace_editor_name
+                ELSE cd.editor_name
+            END AS editor_name,
             cd.region,
             cd.region_level_id,
             cd.camera_model_name,

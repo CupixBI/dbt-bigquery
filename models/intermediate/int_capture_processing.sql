@@ -108,10 +108,21 @@ editing_editor_id AS (
     SELECT
         capture_trace_id,
         tenant,
-        ARRAY_AGG(editor_id IGNORE NULLS ORDER BY timestamp DESC LIMIT 1)[SAFE_OFFSET(0)] AS trace_editor_id
-    FROM capture_trace
-    WHERE stage LIKE '%editing_editing%'
-    GROUP BY capture_trace_id, tenant
+        latest.editor_id   AS trace_editor_id,
+        latest.editor_name AS trace_editor_name
+    FROM (
+        SELECT
+            capture_trace_id,
+            tenant,
+            ARRAY_AGG(
+                STRUCT(editor_id, editor_name)
+                ORDER BY timestamp DESC
+                LIMIT 1
+            )[SAFE_OFFSET(0)] AS latest
+        FROM capture_trace
+        WHERE stage LIKE '%editing_editing%'
+        GROUP BY capture_trace_id, tenant
+    )
 ),
 
 review_finished_cte AS (
@@ -299,7 +310,8 @@ final AS (
 final_with_trace_editor AS (
     SELECT
         f.*,
-        u.user_email AS trace_editor_email
+        u.user_email      AS trace_editor_email,
+        ee.trace_editor_name
     FROM final f
     LEFT JOIN editing_editor_id ee
         ON f.capture_trace_id = ee.capture_trace_id
