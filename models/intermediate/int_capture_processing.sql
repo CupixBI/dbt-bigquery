@@ -104,6 +104,16 @@ editing_created_at AS (
     GROUP BY captures.capture_trace_id, editings.created_at
 ),
 
+editing_editor_id AS (
+    SELECT
+        capture_trace_id,
+        tenant,
+        ARRAY_AGG(editor_id IGNORE NULLS ORDER BY timestamp DESC LIMIT 1)[SAFE_OFFSET(0)] AS trace_editor_id
+    FROM capture_trace
+    WHERE stage LIKE '%editing_editing%'
+    GROUP BY capture_trace_id, tenant
+),
+
 review_finished_cte AS (
     SELECT
         ct.capture_trace_id,
@@ -286,4 +296,18 @@ final AS (
         facilities.team_name
 )
 
-SELECT * FROM final
+final_with_trace_editor AS (
+    SELECT
+        f.*,
+        u.user_email AS trace_editor_email
+    FROM final f
+    LEFT JOIN editing_editor_id ee
+        ON f.capture_trace_id = ee.capture_trace_id
+        AND f.tenant = ee.tenant
+    LEFT JOIN users u
+        ON u.user_id = ee.trace_editor_id
+        AND u.tenant = f.tenant
+        AND u.region = f.region
+)
+
+SELECT * FROM final_with_trace_editor
