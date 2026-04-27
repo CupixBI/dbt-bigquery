@@ -69,6 +69,7 @@ sources:
     tables:
       - name: capture_traces
       - name: segment_events
+      - name: element_records
 
   - name: seed
     database: prism-485708

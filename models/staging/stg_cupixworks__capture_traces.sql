@@ -52,6 +52,7 @@ final AS (
     JSON_VALUE(log_json, '$.remark')                  AS stage,
     JSON_VALUE(log_json, '$.class_name')              AS class_name,
     JSON_VALUE(log_json, '$.class')                   AS class,
+    CAST(JSON_VALUE(log_json, '$.model_id') AS STRING)                        AS editing_id,
     REGEXP_EXTRACT(JSON_VALUE(log_json, '$.message'), r'editor_name: ([^)]+)') AS editor_name,
     REGEXP_EXTRACT(JSON_VALUE(log_json, '$.message'), r'editor_id: (\d+)')    AS editor_id,
     CASE
@@ -72,6 +73,24 @@ final AS (
             TRIM(REPLACE(tenant, '"', ''))
         )
     END AS region_editor_id,
+    CASE
+        WHEN CAST(JSON_VALUE(log_json, '$.model_id') AS STRING) IS NOT NULL
+        THEN CONCAT(
+            CASE region
+                WHEN 'uswe2' THEN 'US'
+                WHEN 'apse2' THEN 'AU'
+                WHEN 'euce1' THEN 'EU'
+                WHEN 'apne1' THEN 'JP'
+                WHEN 'apse1' THEN 'SG'
+                WHEN 'cace1' THEN 'CA'
+                ELSE 'Unknown'
+            END,
+            '-',
+            CAST(JSON_VALUE(log_json, '$.model_id') AS STRING),
+            '-',
+            TRIM(REPLACE(tenant, '"', ''))
+        )
+    END AS region_editing_id,
     log_json,
     TRIM(REPLACE(tenant, '"', '')) AS tenant
   FROM deduped

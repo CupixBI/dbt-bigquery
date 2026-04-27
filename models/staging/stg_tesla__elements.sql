@@ -158,6 +158,36 @@ final AS (
             '-',
             tenant
         ) AS region_bim_id,
+        CONCAT(
+            CASE region
+                WHEN 'uswe2' THEN 'US'
+                WHEN 'apse2' THEN 'AU'
+                WHEN 'euce1' THEN 'EU'
+                WHEN 'apne1' THEN 'JP'
+                WHEN 'apse1' THEN 'SG'
+                WHEN 'cace1' THEN 'CA'
+                ELSE 'Unknown'
+            END,
+            '-', facility_id,
+            '-', bim_id,
+            '-', bim_external_id,
+            '-', bim_revision_id,
+            '-', cycle_state,
+            '-', tenant
+        ) AS region_bim_element_revision_id,
+        CONCAT(
+            CASE region
+                WHEN 'uswe2' THEN 'US'
+                WHEN 'apse2' THEN 'AU'
+                WHEN 'euce1' THEN 'EU'
+                WHEN 'apne1' THEN 'JP'
+                WHEN 'apse1' THEN 'SG'
+                WHEN 'cace1' THEN 'CA'
+                ELSE 'Unknown'
+            END,
+            '-', bim_external_id,
+            '-', tenant
+        ) AS region_bim_external_id,
         id,
         tenant,
         facility_id,
@@ -202,3 +232,7 @@ final AS (
 )
 
 SELECT * FROM final
+WHERE (region_facility_id IS NOT NULL
+  OR region_bim_id IS NOT NULL
+  OR region_bim_external_id IS NOT NULL)
+  AND cycle_state = 'created'

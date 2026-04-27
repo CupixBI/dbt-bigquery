@@ -11,6 +11,7 @@ renamed AS (
         region,
         tenant,
         CAST(facility_id as STRING) as facility_id,
+        CAST(last_bim_revision_id AS STRING) as last_bim_revision_id,
         TIMESTAMP(created_at) as created_at,
         cycle_state
     FROM source
@@ -23,6 +24,7 @@ final AS (
         region,
         tenant,
         facility_id,
+        last_bim_revision_id,
         created_at,
         cycle_state,
         CONCAT(

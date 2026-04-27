@@ -40,7 +40,8 @@ users AS (
 bims AS (
     SELECT
         region_bim_id,
-        name AS bim_name
+        name AS bim_name,
+        last_bim_revision_id
     FROM {{ ref('stg_tesla__bims') }}
 ),
 
@@ -66,6 +67,8 @@ final AS (
         ON e.region_user_id = u.region_user_id
     LEFT JOIN bims b
         ON e.region_bim_id = b.region_bim_id
+    WHERE e.bim_revision_id = b.last_bim_revision_id
+       OR (e.bim_revision_id IS NULL AND b.last_bim_revision_id IS NULL)
 )
 
 SELECT * FROM final
