@@ -67,8 +67,8 @@ SELECT
 FROM hours
 WHERE
     CASE
-        WHEN work_finished <= 24
+        WHEN work_finished > work_started
             THEN hour >= work_started AND hour < work_finished
         ELSE
-            hour >= work_started OR hour < (work_finished - 24)
+            hour >= work_started OR hour < MOD(work_finished, 24)
     END
