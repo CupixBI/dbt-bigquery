@@ -6,12 +6,14 @@ with source as (
 final as (
     select
         date(uploading_finished_at_kst)                     as capture_date,
+        region_record_id,
         region_level_id,
         region_facility_id,
         project_name,
         team_name,
         region,
         tenant,
+        preview_quality,
 
         -- 분기1 분모: DWG 생성일 이후 촬영된 capture 수
         countif(is_captured_after_bim_created = true)       as after_bim_capture_count,
@@ -38,7 +40,7 @@ final as (
         )                                                   as refinement_adopted_count
 
     from source
-    group by 1, 2, 3, 4, 5, 6, 7
+    group by 1, 2, 3, 4, 5, 6, 7, 8, 9
 )
 
 select * from final
