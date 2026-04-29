@@ -18,8 +18,8 @@ sqa_requested AS (
         DATE(created_at, 'Asia/Seoul') AS date_kst,
         region,
         tenant,
-        COALESCE(estimated_status_name, 'Not Evaluated') AS status_name,
-        COALESCE(CAST(processing_result_trust_level AS STRING), 'Not Evaluated') AS trust_level,
+        NULL AS status_name,
+        NULL AS trust_level,
         SUM(stat_total_entities) AS element_count,
         'sqa_requested' AS type
     FROM {{ ref('int_editings') }}
