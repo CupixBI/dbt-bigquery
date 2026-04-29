@@ -28,6 +28,13 @@ captures AS (
     WHERE region_record_id IS NOT NULL
     GROUP BY region_record_id
 ),
+records AS (
+    SELECT
+        region_record_id,
+        siteinsights_published_at
+    FROM {{ ref('stg_tesla__records') }}
+),
+
 sitetracks AS (
     SELECT
         level_id,
@@ -68,7 +75,7 @@ final AS (
 
         r.parent_id IS NOT NULL AS has_review_editing,
         r.reviewer_email,
-
+        rec.siteinsights_published_at,
 
     FROM editings AS e
     LEFT JOIN captures AS c ON c.region_record_id = e.region_record_id
@@ -78,6 +85,7 @@ final AS (
         AND e.level_id IS NOT NULL
         AND e.region_record_id IS NOT NULL
     LEFT JOIN reviews AS r ON r.parent_id = e.editing_id
+    LEFT JOIN records AS rec ON rec.region_record_id = e.region_record_id
 )
 
 SELECT * FROM final

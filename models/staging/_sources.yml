@@ -30,6 +30,8 @@ sources:
       - name: element_traces
       - name: elements
       - name: statuses
+      - name: reviewers
+      - name: records
 
   - name: monday  
     database: prism-485708  

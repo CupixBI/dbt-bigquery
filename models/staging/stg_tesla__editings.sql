@@ -75,8 +75,10 @@ final AS(
         parent_id,
         tenant,
         facility_id,
+        CONCAT(region_simplify, '-', facility_id, '-', tenant) AS region_facility_id,
         preview_quality,
         team_id,
+        CONCAT(region_simplify, '-', team_id, '-', tenant) AS region_team_id,
 
     FROM renamed
 )
