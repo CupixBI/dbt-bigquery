@@ -7,7 +7,7 @@ WITH created AS (
         COALESCE(estimated_status_name, 'Not Evaluated') AS status_name,
         COALESCE(CAST(processing_result_trust_level AS STRING), 'Not Evaluated') AS trust_level,
         COUNT(*) AS element_count,
-        'created' AS type
+        'trace_created' AS type
     FROM {{ ref('int_element_traces') }}
     GROUP BY 1, 2, 3, 4, 5, 6
 ),
@@ -18,8 +18,8 @@ sqa_requested AS (
         DATE(created_at, 'Asia/Seoul') AS date_kst,
         region,
         tenant,
-        NULL AS status_name,
-        NULL AS trust_level,
+        CAST(NULL AS STRING) AS status_name,
+        CAST(NULL AS STRING) AS trust_level,
         SUM(stat_total_entities) AS element_count,
         'sqa_requested' AS type
     FROM {{ ref('int_editings') }}
