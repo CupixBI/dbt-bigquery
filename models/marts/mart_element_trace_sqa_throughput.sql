@@ -38,7 +38,7 @@ sqa_edited AS (
         SUM(stat_total_entities) AS element_count,
         'sqa_edited' AS type
     FROM {{ ref('int_editings') }}
-    WHERE editing_type = 'siteinsights' and state IN ('holding')
+    WHERE editing_type = 'siteinsights' AND state NOT IN ('holding')
     GROUP BY 1, 2, 3, 4, 5, 6
 ),
 
